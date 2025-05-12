@@ -13,7 +13,7 @@ public class BookableUnit {
     @Id
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     private Washer washer;
 
     @ManyToOne

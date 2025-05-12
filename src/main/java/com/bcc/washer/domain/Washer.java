@@ -2,6 +2,9 @@ package com.bcc.washer.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+import java.util.List;
 
 @Entity
 public class Washer {
@@ -12,5 +15,7 @@ public class Washer {
     private int capacity;
     private boolean isInOrder;
 
+    @OneToMany(mappedBy = "washer")
+    private List<BookableUnit> bookableUnits;
 
 }
