@@ -21,8 +21,9 @@ public class BookableUnit {
 
     private boolean isAvailable;
 
-    public BookableUnit(Washer washer) {
+    public BookableUnit(Washer washer, TimeSlot timeSlot) {
         this.washer = washer;
+        this.timeSlot = timeSlot;
         this.isAvailable = true;
     }
 
