@@ -34,9 +34,9 @@ dependencies {
 		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 		runtimeOnly 'org.postgresql:postgresql'
 
-//		// --- Security & Authentication ---
-//		implementation 'org.springframework.boot:spring-boot-starter-security'
-//		implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+		// --- Security & Authentication ---
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+		implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 //		// --- Development & Runtime Tools ---
 //		developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
