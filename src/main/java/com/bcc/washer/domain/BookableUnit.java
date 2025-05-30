@@ -13,6 +13,7 @@ import java.sql.Time;
 public class BookableUnit {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY )
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL)

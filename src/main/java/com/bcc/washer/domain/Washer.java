@@ -1,8 +1,6 @@
 package com.bcc.washer.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
@@ -16,6 +14,7 @@ import java.util.List;
 public class Washer {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY )
     private Long id;
     private String name;
     private int capacity;
