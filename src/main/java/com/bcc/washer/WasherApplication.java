@@ -8,6 +8,7 @@ public class WasherApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(WasherApplication.class, args);
+		System.out.println("A pornit motorul! Vrum!");
 	}
 
 }

@@ -1,3 +1,4 @@
+// src/main/java/com/bcc/washer/service/BookableUnitService.java
 package com.bcc.washer.service;
 
 
@@ -5,6 +6,7 @@ import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.TimeInterval;
 import com.bcc.washer.domain.TimeSlot;
 import com.bcc.washer.domain.Washer;
+import com.bcc.washer.domain.WasherStatus; // Import the new WasherStatus enum
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeIntervalRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
@@ -54,27 +56,20 @@ public class BookableUnitService {
 
     }
 
-//    public Set<BookableUnit> getAllABookableUnitsHistoryByUser(Long userId) {
-//        //// not working yet
-//
-//        return bookableUnitRepository.findAll()
-//                .stream()
-//                .filter(BookableUnit::isAvailable)
-//                .collect(Collectors.toSet());
-//    }
-
     @Transactional
     public void generateBookableUnits() {
         List<TimeInterval> futureTimeIntervals = timeIntervalRepository.findAll()
                 .stream().filter(timeInterval ->
-                        timeInterval.getDate().isAfter(LocalDate.now())
-                                /*&& timeInterval.getTimeSlot() != null*/)
+                                timeInterval.getDate().isAfter(LocalDate.now())
+                        /*&& timeInterval.getTimeSlot() != null*/)
                 .toList();
         futureTimeIntervals.forEach(ti -> timeSlotRepository.save(TimeSlot.builder().timeInterval(ti).build()));
 
         var futureTimeSlotList = timeSlotRepository.findAll();
 
-        washerRepository.findAll().stream().filter(Washer::isInOrder)
+        // FIX: Changed Washer::isInOrder to check for WasherStatus.AVAILABLE
+        washerRepository.findAll().stream()
+                .filter(washer -> washer.getStatus() == WasherStatus.AVAILABLE) // Changed condition here
                 .forEach(washer ->
                         futureTimeSlotList.forEach(timeSlot ->
                                 bookableUnitRepository.save(

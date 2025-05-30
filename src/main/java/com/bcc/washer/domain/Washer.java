@@ -1,3 +1,4 @@
+// src/main/java/com/bcc/washer/domain/Washer.java
 package com.bcc.washer.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,7 +20,10 @@ public class Washer {
     private Long id;
     private String name;
     private int capacity;
-    private boolean isInOrder;
+
+    @Enumerated(EnumType.STRING) // Store enum as String in DB
+    @Column(nullable = false)
+    private WasherStatus status; // Replaced 'isInOrder' with 'status'
 
     @JsonIgnore
     @OneToMany(mappedBy = "washer")
