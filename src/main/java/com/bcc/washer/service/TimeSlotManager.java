@@ -12,12 +12,9 @@ import java.util.List;
 public class TimeSlotManager {
 
 
-    private final TimeSlotRepository timeSlotRepository;
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
 
-
-    public TimeSlotManager(TimeSlotRepository timeSlotRepository) {
-        this.timeSlotRepository = timeSlotRepository;
-    }
 
 
     public List<TimeSlot> getAvailableTimeSlots() {

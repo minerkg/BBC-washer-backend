@@ -1,5 +1,8 @@
 package com.bcc.washer.controller;
 
+import lombok.Builder;
+
+@Builder
 public class ApiResponse<T> {
 
     private String header;

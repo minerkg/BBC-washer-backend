@@ -4,10 +4,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import lombok.*;
 
 import java.sql.Time;
-
 @Entity
+@Builder
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class BookableUnit {
 
     @Id
@@ -27,19 +32,5 @@ public class BookableUnit {
         this.isAvailable = true;
     }
 
-    public BookableUnit() {
 
-    }
-
-    public void setUnavailable() {
-        this.isAvailable = false;
-    }
-
-    public Washer getWasher() {
-        return washer;
-    }
-
-    public boolean getIsAvailable() {
-        return isAvailable;
-    }
 }

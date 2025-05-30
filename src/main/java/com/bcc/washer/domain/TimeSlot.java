@@ -4,11 +4,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import lombok.*;
 
 import java.util.List;
 
 
 @Entity
+@Builder
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class TimeSlot {
 
     @Id
@@ -20,28 +26,4 @@ public class TimeSlot {
     @OneToMany(mappedBy = "timeSlot")
     private List<BookableUnit> bookableUnit;
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public TimeInterval getTimeInterval() {
-        return timeInterval;
-    }
-
-    public void setTimeInterval(TimeInterval timeInterval) {
-        this.timeInterval = timeInterval;
-    }
-
-    public List<BookableUnit> getBookableUnit() {
-        return bookableUnit;
-    }
-
-    public void setBookableUnit(List<BookableUnit> bookableUnit) {
-        this.bookableUnit = bookableUnit;
-    }
 }
