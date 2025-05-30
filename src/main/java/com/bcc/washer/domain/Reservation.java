@@ -10,6 +10,28 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@NamedEntityGraph(
+        name = "Reservation.withAllData",
+        attributeNodes = {
+                @NamedAttributeNode(value = "user"),
+                @NamedAttributeNode(value = "bookableUnit", subgraph = "bookableUnit-subgraph")
+        },
+
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "bookableUnit-subgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode(value = "washer"),
+                                @NamedAttributeNode(value = "timeSlot", subgraph = "timeInterval-subgraph"),
+                        }
+                ),
+                @NamedSubgraph(
+                        name = "timeInterval-subgraph", attributeNodes = {
+                        @NamedAttributeNode(value = "timeInterval")
+                }
+                )
+        }
+)
 public class Reservation {
 
     @Id

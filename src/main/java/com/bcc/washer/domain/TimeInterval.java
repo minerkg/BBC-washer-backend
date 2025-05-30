@@ -1,5 +1,6 @@
 package com.bcc.washer.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class TimeInterval {
     private LocalDateTime endTime;
     private LocalDate date;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "timeInterval", cascade = CascadeType.ALL)
     private TimeSlot timeSlot;
 
