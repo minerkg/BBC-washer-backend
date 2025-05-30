@@ -1,9 +1,6 @@
 package com.bcc.washer.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Time;
@@ -18,10 +15,10 @@ public class BookableUnit {
     @Id
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Washer washer;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private TimeSlot timeSlot;
 
     private boolean isAvailable;
