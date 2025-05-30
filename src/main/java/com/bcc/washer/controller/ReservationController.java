@@ -20,7 +20,7 @@ public class ReservationController {
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<Set<Reservation>>> getAllReservationByUser(@PathVariable("userId") Long userId) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>("", reservationService.findAllByUser(userId)));
+            return ResponseEntity.ok(new ApiResponse<>("all reservations of the client", reservationService.findAllByUser(userId)));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
