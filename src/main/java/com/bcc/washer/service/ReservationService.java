@@ -2,12 +2,14 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.Reservation;
-import com.bcc.washer.domain.User;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.ReservationRepository;
 import com.bcc.washer.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -32,5 +34,14 @@ public class ReservationService {
         reservationRepository.save(Reservation.builder().user(user).bookableUnit(bookableUnit).build());
         return newReservation;
 
+    }
+
+    public Set<Reservation> findAllByUser(Long userId) {
+        var user = userRepository.findById(userId).orElseThrow(
+                () -> new RuntimeException("user not found")
+        );
+        return reservationRepository.findAll().stream().filter(
+                reservation -> reservation.getUser().equals(user)
+        ).collect(Collectors.toSet());
     }
 }

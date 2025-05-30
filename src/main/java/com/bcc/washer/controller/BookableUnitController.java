@@ -22,9 +22,6 @@ public class BookableUnitController {
     @Autowired
     private BookableUnitService bookableUnitService;
 
-    @Autowired
-    private ReservationService reservationService;
-
     @GetMapping("")
     public ResponseEntity<ApiResponse<Set<BookableUnit>>> getAllAvailableBookableUnits() {
         try {
@@ -57,16 +54,7 @@ public class BookableUnitController {
     }
 
 
-    @PostMapping("/book/{id}")
-    public ResponseEntity<ApiResponse<Reservation>> makeReservation(@PathVariable("id") Long bookableUnitId, @RequestParam Long userId) {
-        try {
-            Reservation newReservation = reservationService.makeReservation(bookableUnitId, userId);
-            return ResponseEntity.ok(new ApiResponse<>("appointment booked", newReservation));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
 
-    }
 
 
 }
