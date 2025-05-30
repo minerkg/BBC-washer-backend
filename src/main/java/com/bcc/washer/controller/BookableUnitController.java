@@ -47,5 +47,11 @@ public class BookableUnitController {
         }
     }
 
+    @GetMapping("/generate")
+    public ResponseEntity<ApiResponse<String>> generateBookableUnits() {
+        bookableUnitService.generateBookableUnits();
+        return ResponseEntity.ok().build();
+    }
+
 
 }
