@@ -19,11 +19,11 @@ public class TimeSlot {
     @GeneratedValue(strategy = GenerationType.IDENTITY )
     private Long id;
 
-    @OneToOne
+    @OneToOne( cascade = CascadeType.ALL, orphanRemoval = true)
     private TimeInterval timeInterval;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "timeSlot")
+    @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookableUnit> bookableUnit;
 
 }

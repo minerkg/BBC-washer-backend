@@ -1,9 +1,6 @@
 package com.bcc.washer.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -23,6 +20,9 @@ public class TimeInterval {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LocalDate date;
+
+    @OneToOne(mappedBy = "timeInterval", cascade = CascadeType.ALL)
+    private TimeSlot timeSlot;
 
 
 }

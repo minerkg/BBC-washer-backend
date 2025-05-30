@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,6 +44,16 @@ public class BookableUnitService {
 
     }
 
+    public Set<BookableUnit> getAllAvailableBookableUnitsWithinOneWeek() {
+        LocalDate today = LocalDate.now();
+        LocalDate oneWeekLater = today.plusDays(7);
+        return bookableUnitRepository.findAll()
+                .stream()
+                .filter(bu -> bu.isAvailable() && bu.getTimeSlot().getTimeInterval().getDate().isBefore(oneWeekLater))
+                .collect(Collectors.toSet());
+
+    }
+
     public Set<BookableUnit> getAllABookableUnitsHistoryByUser(Long userId) {
         //// not working yet
 
@@ -57,7 +66,9 @@ public class BookableUnitService {
     @Transactional
     public void generateBookableUnits() {
         List<TimeInterval> futureTimeIntervals = timeIntervalRepository.findAll()
-                .stream().filter(timeInterval -> timeInterval.getDate().isAfter(LocalDate.now()))
+                .stream().filter(timeInterval ->
+                        timeInterval.getDate().isAfter(LocalDate.now())
+                                /*&& timeInterval.getTimeSlot() != null*/)
                 .toList();
         futureTimeIntervals.forEach(ti -> timeSlotRepository.save(TimeSlot.builder().timeInterval(ti).build()));
 

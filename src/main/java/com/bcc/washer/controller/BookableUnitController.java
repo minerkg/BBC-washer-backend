@@ -28,7 +28,7 @@ public class BookableUnitController {
         try {
             logger.info("get all bookable unit accessed");
             return ResponseEntity.ok()
-                    .body(new ApiResponse<>("all bookable units", bookableUnitService.getAllAvailableBookableUnits())
+                    .body(new ApiResponse<>("all bookable units", bookableUnitService.getAllAvailableBookableUnitsWithinOneWeek())
                     );
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
