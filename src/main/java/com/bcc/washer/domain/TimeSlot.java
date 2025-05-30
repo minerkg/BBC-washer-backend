@@ -1,5 +1,6 @@
 package com.bcc.washer.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class TimeSlot {
     @OneToOne
     private TimeInterval timeInterval;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "timeSlot")
     private List<BookableUnit> bookableUnit;
 

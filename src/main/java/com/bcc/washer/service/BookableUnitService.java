@@ -7,6 +7,7 @@ import com.bcc.washer.domain.TimeSlot;
 import com.bcc.washer.domain.Washer;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeIntervalRepository;
+import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,9 @@ public class BookableUnitService {
     @Autowired
     private WasherRepository washerRepository;
 
+
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private TimeIntervalRepository timeIntervalRepository;
@@ -52,11 +56,12 @@ public class BookableUnitService {
 
     @Transactional
     public void generateBookableUnits() {
-        List<TimeSlot> futureTimeSlotList = new ArrayList<>();
         List<TimeInterval> futureTimeIntervals = timeIntervalRepository.findAll()
                 .stream().filter(timeInterval -> timeInterval.getDate().isAfter(LocalDate.now()))
                 .toList();
-        futureTimeIntervals.forEach(ti -> futureTimeSlotList.add(TimeSlot.builder().timeInterval(ti).build()));
+        futureTimeIntervals.forEach(ti -> timeSlotRepository.save(TimeSlot.builder().timeInterval(ti).build()));
+
+        var futureTimeSlotList = timeSlotRepository.findAll();
 
         washerRepository.findAll().stream().filter(Washer::isInOrder)
                 .forEach(washer ->
@@ -67,6 +72,7 @@ public class BookableUnitService {
                                                 .timeSlot(timeSlot)
                                                 .washer(washer)
                                                 .build())
+
                         )
                 );
     }

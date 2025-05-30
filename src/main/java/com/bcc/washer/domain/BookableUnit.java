@@ -3,17 +3,33 @@ package com.bcc.washer.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Time;
 @Entity
 @Builder
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@NamedEntityGraph(
+        name = "BookableUnit.withAllData",
+        attributeNodes = {
+                @NamedAttributeNode(value = "washer"),
+                @NamedAttributeNode(value = "timeSlot", subgraph = "timeSlot-subgraph")
+        },
+
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "timeSlot-subgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode(value = "timeInterval")
+                        }
+                )
+
+        }
+)
 public class BookableUnit {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL)
