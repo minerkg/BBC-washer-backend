@@ -54,14 +54,14 @@ public class BookableUnitService {
 
     }
 
-    public Set<BookableUnit> getAllABookableUnitsHistoryByUser(Long userId) {
-        //// not working yet
-
-        return bookableUnitRepository.findAll()
-                .stream()
-                .filter(BookableUnit::isAvailable)
-                .collect(Collectors.toSet());
-    }
+//    public Set<BookableUnit> getAllABookableUnitsHistoryByUser(Long userId) {
+//        //// not working yet
+//
+//        return bookableUnitRepository.findAll()
+//                .stream()
+//                .filter(BookableUnit::isAvailable)
+//                .collect(Collectors.toSet());
+//    }
 
     @Transactional
     public void generateBookableUnits() {

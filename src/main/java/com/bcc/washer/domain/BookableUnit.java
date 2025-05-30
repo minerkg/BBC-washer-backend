@@ -38,6 +38,9 @@ public class BookableUnit {
     @ManyToOne(cascade = CascadeType.ALL)
     private TimeSlot timeSlot;
 
+    @OneToOne(mappedBy = "bookableUnit")
+    private Reservation reservation;
+
     private boolean isAvailable;
 
     public BookableUnit(Washer washer, TimeSlot timeSlot) {
