@@ -4,6 +4,7 @@ import com.bcc.washer.domain.Role;
 import com.bcc.washer.domain.User;
 import com.bcc.washer.dto.UserRegistrationRequest;
 import com.bcc.washer.exceptions.UserAlreadyExistsException;
+import com.bcc.washer.exceptions.UserNotFoundException;
 import com.bcc.washer.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,4 +57,11 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public User updateUserRole(Long userId, Role newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+        user.setRole(newRole);
+        return userRepository.save(user);
+    }
 }
