@@ -72,4 +72,6 @@ public class ReservationController {
             return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to retrieve all reservations", null));
         }
     }
+
+
 }
