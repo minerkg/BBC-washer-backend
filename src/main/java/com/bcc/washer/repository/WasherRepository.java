@@ -1,6 +1,6 @@
 package com.bcc.washer.repository;
 
-import com.bcc.washer.domain.Washer;
+import com.bcc.washer.domain.washer.Washer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
