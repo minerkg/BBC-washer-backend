@@ -1,7 +1,7 @@
-// src/main/java/com/bcc/washer/controller/WasherController.java
+
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.Washer;
+import com.bcc.washer.domain.washer.Washer;
 import com.bcc.washer.service.WasherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,21 +38,10 @@ public class WasherController {
         }
     }
 
-    // New endpoint to get all washers with real-time status (includes IN_USE)
-    @GetMapping("/status") // Can be accessed by EMPLOYEE or USER roles as well
-    public ResponseEntity<ApiResponse<List<Washer>>> getAllWashersWithRealtimeStatus() {
-        try {
-            List<Washer> washers = washerService.getAllWashersWithRealtimeStatus();
-            return ResponseEntity.ok(new ApiResponse<>("All washers with real-time status retrieved", washers));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to retrieve real-time washer statuses", null));
-        }
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Washer>> getWasherById(@PathVariable Long id) {
         try {
-            // This will return the stored status (AVAILABLE/MAINTENANCE)
             Washer washer = washerService.getWasherById(id);
             return ResponseEntity.ok(new ApiResponse<>("Washer retrieved", washer));
         } catch (RuntimeException e) {
@@ -62,18 +51,6 @@ public class WasherController {
         }
     }
 
-    // New endpoint to get a single washer with real-time status
-    @GetMapping("/{id}/status") // Can be accessed by EMPLOYEE or USER roles as well
-    public ResponseEntity<ApiResponse<Washer>> getWasherWithRealtimeStatusById(@PathVariable Long id) {
-        try {
-            Washer washer = washerService.getWasherWithRealtimeStatusById(id);
-            return ResponseEntity.ok(new ApiResponse<>("Washer with real-time status retrieved", washer));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Washer not found", null));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to retrieve real-time washer status", null));
-        }
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Washer>> updateWasher(@PathVariable Long id, @RequestBody Washer washer) {

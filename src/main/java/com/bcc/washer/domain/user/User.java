@@ -1,5 +1,6 @@
-package com.bcc.washer.domain;
+package com.bcc.washer.domain.user;
 
+import com.bcc.washer.domain.user.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

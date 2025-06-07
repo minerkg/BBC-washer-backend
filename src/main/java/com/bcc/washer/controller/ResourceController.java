@@ -1,7 +1,7 @@
 // src/main/java/com/bcc/washer/controller/ResourceController.java
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.User;
+import com.bcc.washer.domain.user.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;

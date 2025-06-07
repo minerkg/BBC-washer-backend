@@ -3,10 +3,9 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
-import com.bcc.washer.domain.TimeInterval;
-import com.bcc.washer.domain.TimeSlot;
-import com.bcc.washer.domain.Washer;
-import com.bcc.washer.domain.WasherStatus; // Import the new WasherStatus enum
+import com.bcc.washer.domain.time.TimeInterval;
+import com.bcc.washer.domain.time.TimeSlot;
+import com.bcc.washer.domain.washer.WasherStatus;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeIntervalRepository;
 import com.bcc.washer.repository.TimeSlotRepository;

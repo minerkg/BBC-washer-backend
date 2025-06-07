@@ -2,8 +2,8 @@
 package com.bcc.washer.service;
 
 import com.bcc.washer.domain.BookableUnit;
-import com.bcc.washer.domain.Reservation;
-import com.bcc.washer.domain.ReservationStatus; // Import the new enum
+import com.bcc.washer.domain.reservation.Reservation;
+import com.bcc.washer.domain.reservation.ReservationStatus; // Import the new enum
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.ReservationRepository;
 import com.bcc.washer.repository.UserRepository;

@@ -2,9 +2,7 @@ package com.bcc.washer.controller;
 
 
 import com.bcc.washer.domain.BookableUnit;
-import com.bcc.washer.domain.Reservation;
 import com.bcc.washer.service.BookableUnitService;
-import com.bcc.washer.service.ReservationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
