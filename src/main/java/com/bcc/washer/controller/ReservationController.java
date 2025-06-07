@@ -1,7 +1,7 @@
 // src/main/java/com/bcc/washer/controller/ReservationController.java
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.Reservation;
+import com.bcc.washer.domain.reservation.Reservation;
 import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
 import com.bcc.washer.exceptions.ReservationNotFoundException;
 import com.bcc.washer.exceptions.UserNotFoundException;

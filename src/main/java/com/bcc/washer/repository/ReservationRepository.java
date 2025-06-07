@@ -1,6 +1,6 @@
 package com.bcc.washer.repository;
 
-import com.bcc.washer.domain.Reservation;
+import com.bcc.washer.domain.reservation.Reservation;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

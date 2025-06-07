@@ -1,11 +1,8 @@
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.Role;
-import com.bcc.washer.domain.User;
 import com.bcc.washer.dto.UserRegistrationRequest;
-import com.bcc.washer.exceptions.UserNotFoundException;
 import com.bcc.washer.exceptions.WasherStoreException;
-import com.bcc.washer.service.UserService;
+import com.bcc.washer.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

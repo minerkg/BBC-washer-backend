@@ -1,6 +1,8 @@
 // src/main/java/com/bcc/washer/domain/Reservation.java
-package com.bcc.washer.domain;
+package com.bcc.washer.domain.reservation;
 
+import com.bcc.washer.domain.BookableUnit;
+import com.bcc.washer.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 

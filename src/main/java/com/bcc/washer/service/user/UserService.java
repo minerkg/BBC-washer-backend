@@ -1,7 +1,7 @@
-package com.bcc.washer.service;
+package com.bcc.washer.service.user;
 
-import com.bcc.washer.domain.Role;
-import com.bcc.washer.domain.User;
+import com.bcc.washer.domain.user.Role;
+import com.bcc.washer.domain.user.User;
 import com.bcc.washer.dto.UserRegistrationRequest;
 import com.bcc.washer.exceptions.UserAlreadyExistsException;
 import com.bcc.washer.exceptions.UserNotFoundException;
@@ -10,7 +10,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 @Service

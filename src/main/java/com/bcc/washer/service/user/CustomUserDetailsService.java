@@ -1,5 +1,5 @@
 // src/main/java/com/bcc/washer/service/CustomUserDetailsService.java
-package com.bcc.washer.service;
+package com.bcc.washer.service.user;
 
 import com.bcc.washer.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

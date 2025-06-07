@@ -1,5 +1,5 @@
 // src/main/java/com/bcc/washer/domain/ReservationStatus.java
-package com.bcc.washer.domain;
+package com.bcc.washer.domain.reservation;
 
 public enum ReservationStatus {
     PENDING,        // Optionally, if there's a confirmation step
