@@ -1,5 +1,6 @@
 package com.bcc.washer.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,6 +26,7 @@ public class User implements UserDetails {
     @Column(unique=true)
     private String username;
 
+    @JsonIgnore
     @Column(nullable=false)
     private String password;
 
@@ -36,10 +38,12 @@ public class User implements UserDetails {
 
     @Column(nullable=false,unique=true)
     private String email;
+
     @Column(nullable=false,unique=true)
     private String phone;
     private String nr_matricol;
 
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
     private Role role;

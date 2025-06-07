@@ -1,23 +1,45 @@
 package com.bcc.washer.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-
-import java.sql.Time;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Builder
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@NamedEntityGraph(
+        name = "BookableUnit.withAllData",
+        attributeNodes = {
+                @NamedAttributeNode(value = "washer"),
+                @NamedAttributeNode(value = "timeSlot", subgraph = "timeSlot-subgraph")
+        },
+
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "timeSlot-subgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode(value = "timeInterval")
+                        }
+                )
+
+        }
+)
 public class BookableUnit {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Washer washer;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private TimeSlot timeSlot;
+
+    @OneToOne(mappedBy = "bookableUnit")
+    private Reservation reservation;
 
     private boolean isAvailable;
 
@@ -27,19 +49,5 @@ public class BookableUnit {
         this.isAvailable = true;
     }
 
-    public BookableUnit() {
 
-    }
-
-    public void setUnavailable() {
-        this.isAvailable = false;
-    }
-
-    public Washer getWasher() {
-        return washer;
-    }
-
-    public boolean getIsAvailable() {
-        return isAvailable;
-    }
 }

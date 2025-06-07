@@ -1,47 +1,29 @@
 package com.bcc.washer.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.List;
 
 
 @Entity
+@Builder
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class TimeSlot {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY )
     private Long id;
 
-    @OneToOne
+    @OneToOne( cascade = CascadeType.ALL, orphanRemoval = true)
     private TimeInterval timeInterval;
 
-    @OneToMany(mappedBy = "timeSlot")
+    @JsonIgnore
+    @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookableUnit> bookableUnit;
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public TimeInterval getTimeInterval() {
-        return timeInterval;
-    }
-
-    public void setTimeInterval(TimeInterval timeInterval) {
-        this.timeInterval = timeInterval;
-    }
-
-    public List<BookableUnit> getBookableUnit() {
-        return bookableUnit;
-    }
-
-    public void setBookableUnit(List<BookableUnit> bookableUnit) {
-        this.bookableUnit = bookableUnit;
-    }
 }
