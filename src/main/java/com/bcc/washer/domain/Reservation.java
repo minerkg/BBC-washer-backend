@@ -45,6 +45,6 @@ public class Reservation {
     private BookableUnit bookableUnit;
 
     @Enumerated(EnumType.STRING) // Store enum as String in DB
-    @Column(nullable = false)
+    @Column(nullable = true)
     private ReservationStatus status; // New field for reservation status
 }

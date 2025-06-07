@@ -1,4 +1,3 @@
-// src/main/java/com/bcc/washer/controller/TimeIntervalController.java
 package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.TimeInterval;
