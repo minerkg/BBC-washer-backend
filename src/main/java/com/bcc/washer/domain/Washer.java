@@ -22,7 +22,7 @@ public class Washer {
     private int capacity;
 
     @Enumerated(EnumType.STRING) // Store enum as String in DB
-    @Column(nullable = false)
+    @Column(nullable = true)
     private WasherStatus status; // Replaced 'isInOrder' with 'status'
 
     @JsonIgnore
