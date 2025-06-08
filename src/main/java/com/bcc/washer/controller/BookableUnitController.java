@@ -2,16 +2,15 @@ package com.bcc.washer.controller;
 
 
 import com.bcc.washer.domain.BookableUnit;
-import com.bcc.washer.dto.TimeSlotRequest;
+import com.bcc.washer.domain.ResourceAlreadyExistsException;
+import com.bcc.washer.dto.BetweenDatesRequest;
 import com.bcc.washer.service.BookableUnitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -37,26 +36,17 @@ public class BookableUnitController {
         }
     }
 
-//    @GetMapping("/{userId}")
-//    public ResponseEntity<ApiResponse<Set<BookableUnit>>> getAllBookableUnitsHistoryByUser(@PathVariable("userId") Long userId) {
-//        try {
-//            logger.info("get all bookable unit accessed");
-//            return ResponseEntity.ok()
-//                    .body(new ApiResponse<>("bookable unit history", bookableUnitService.getAllABookableUnitsHistoryByUser(userId))
-//                    );
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError().build();
-//        }
-//    }
 
-    @GetMapping("/admin/generate-units")
-    public ResponseEntity<ApiResponse<String>> generateBookableUnits(@RequestBody TimeSlotRequest timeSlotRequest) {
+    @PostMapping("/admin/generate-units")
+    public ResponseEntity<ApiResponse<String>> generateBookableUnits(@RequestBody BetweenDatesRequest betweenDatesRequest) {
         try {
             bookableUnitService.generateBookableUnits(
-                    timeSlotRequest.getStartDate(),
-                    timeSlotRequest.getEndDate());
+                    betweenDatesRequest.getStartDate(),
+                    betweenDatesRequest.getEndDate());
             return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
+        } catch (ResourceAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }

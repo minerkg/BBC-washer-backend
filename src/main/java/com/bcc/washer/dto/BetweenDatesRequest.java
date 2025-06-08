@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Builder
 @Setter
 @Getter
-public class TimeSlotRequest {
+public class BetweenDatesRequest {
 
     private LocalDate startDate;
     private LocalDate endDate;

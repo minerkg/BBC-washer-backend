@@ -1,20 +1,17 @@
 package com.bcc.washer.service;
 
 
-import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.OPENINGHOURS;
+import com.bcc.washer.domain.ResourceAlreadyExistsException;
 import com.bcc.washer.domain.TimeInterval;
 import com.bcc.washer.domain.TimeSlot;
 import com.bcc.washer.repository.TimeSlotRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TimeSlotManager {
@@ -24,19 +21,20 @@ public class TimeSlotManager {
     private TimeSlotRepository timeSlotRepository;
 
 
-    public List<TimeSlot> getAvailableTimeSlots() {
-        //filter calendars
-        return timeSlotRepository.findAll();
+    public Set<TimeSlot> getAvailableTimeSlotsBetweenDates(LocalDate timeSlotStartDayFrom, LocalDate to) {
+        return new HashSet<>(timeSlotRepository.findAllByDateRange(timeSlotStartDayFrom, to));
     }
 
 
     public List<TimeSlot> createTimeSlots(LocalDate timeSlotStartDayFrom, LocalDate to) {
 
-        //if there is no available timeslot than it generates one with startsDay := from -1
-        TimeSlot latestExistingTimeSlot = getLatestExistingTimeSlot(timeSlotStartDayFrom);
+        final LocalDate from = timeSlotStartDayFrom;
 
-        if (latestExistingTimeSlot.getTimeInterval().getDate().isAfter(to)) {
-            throw new RuntimeException("TimeSlots are already available");
+        TimeSlot latestExistingTimeSlot = getLatestExistingTimeSlot()
+                .orElseGet(() -> createFallbackSlot(from));
+
+        if (latestExistingTimeSlot.getTimeInterval().getDate().isAfter(to) || latestExistingTimeSlot.getTimeInterval().getDate().isEqual(to)) {
+            throw new ResourceAlreadyExistsException("TimeSlots are already available");
         }
         if (latestExistingTimeSlot.getTimeInterval().getDate().isAfter(timeSlotStartDayFrom)) {
             timeSlotStartDayFrom = latestExistingTimeSlot.getTimeInterval().getDate().plusDays(1);
@@ -67,20 +65,24 @@ public class TimeSlotManager {
         return newlyAvailableTimeSlots;
     }
 
-    private TimeSlot getLatestExistingTimeSlot(LocalDate from) {
+    private Optional<TimeSlot> getLatestExistingTimeSlot() {
         return timeSlotRepository.findAll().stream()
-                .max(Comparator.comparing(ts -> ts.getTimeInterval().getEndTime()))
-                .orElse(TimeSlot
-                        .builder()
-                        .timeInterval(TimeInterval
-                                .builder()
-                                .startTime(OPENINGHOURS.CLOSE.getTime().minusHours(1))
-                                .endTime(OPENINGHOURS.CLOSE.getTime())
-                                .date(from.minusDays(1))
-                                .build())
-                        .build());
+                .max(Comparator.comparing(ts -> ts.getTimeInterval().getDate()));
 
     }
 
+    private TimeSlot createFallbackSlot(LocalDate from) {
+        return TimeSlot.builder()
+                .timeInterval(TimeInterval.builder()
+                        .startTime(OPENINGHOURS.CLOSE.getTime().minusHours(1))
+                        .endTime(OPENINGHOURS.CLOSE.getTime())
+                        .date(from.minusDays(1))
+                        .build())
+                .build();
+    }
 
+
+    public void deleteTimeSlot(Long id) {
+        timeSlotRepository.deleteById(id);
+    }
 }
