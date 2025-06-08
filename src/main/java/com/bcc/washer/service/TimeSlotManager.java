@@ -3,7 +3,7 @@ package com.bcc.washer.service;
 
 import com.bcc.washer.domain.OPENINGHOURS;
 import com.bcc.washer.domain.ResourceAlreadyExistsException;
-import com.bcc.washer.domain.TimeInterval;
+import com.bcc.washer.domain.time.TimeInterval;
 import com.bcc.washer.domain.time.TimeSlot;
 import com.bcc.washer.repository.TimeSlotRepository;
 import org.springframework.beans.factory.annotation.Autowired;

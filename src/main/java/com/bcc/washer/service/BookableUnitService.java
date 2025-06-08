@@ -2,7 +2,7 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
-import com.bcc.washer.domain.Washer;
+import com.bcc.washer.domain.washer.WasherStatus;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
@@ -54,14 +54,13 @@ public class BookableUnitService {
     }
 
 
-
     public void generateBookableUnits() {
 
         List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
 
         timeSlotRepository.findAllWithoutBookableUnits()
                 .forEach(timeSlot ->
-                        washerRepository.findAll().stream().filter(Washer::isInOrder)
+                        washerRepository.findAll().stream().filter(washer -> washer.getStatus().equals(WasherStatus.AVAILABLE))
                                 .forEach(washer -> newlyAvailableBookableUnits.add(
                                         BookableUnit.builder()
                                                 .isAvailable(true)

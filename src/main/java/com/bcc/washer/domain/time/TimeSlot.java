@@ -21,7 +21,7 @@ public class TimeSlot {
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private com.bcc.washer.domain.TimeInterval timeInterval;
+    private TimeInterval timeInterval;
 
     @JsonIgnore
     @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
