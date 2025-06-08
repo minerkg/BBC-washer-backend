@@ -3,7 +3,7 @@ package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.ResourceAlreadyExistsException;
 import com.bcc.washer.domain.ResourceNotExists;
-import com.bcc.washer.domain.TimeSlot;
+import com.bcc.washer.domain.time.TimeSlot;
 import com.bcc.washer.dto.BetweenDatesRequest;
 import com.bcc.washer.service.TimeSlotManager;
 import org.slf4j.Logger;
