@@ -6,7 +6,6 @@ import com.bcc.washer.domain.Washer;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +33,7 @@ public class BookableUnitService {
     private TimeSlotManager timeSlotManager;
 
 
+    // TODO: pageable needed
     public Set<BookableUnit> getAllAvailableBookableUnits() {
         return bookableUnitRepository.findAll()
                 .stream()
@@ -42,6 +42,7 @@ public class BookableUnitService {
 
     }
 
+    // TODO: for the next week
     public Set<BookableUnit> getAllAvailableBookableUnitsWithinOneWeek() {
         LocalDate today = LocalDate.now();
         LocalDate oneWeekLater = today.plusDays(7);
@@ -52,24 +53,13 @@ public class BookableUnitService {
 
     }
 
-//    public Set<BookableUnit> getAllABookableUnitsHistoryByUser(Long userId) {
-//        //// not working yet
-//
-//        return bookableUnitRepository.findAll()
-//                .stream()
-//                .filter(BookableUnit::isAvailable)
-//                .collect(Collectors.toSet());
-//    }
 
 
-
-    public void generateBookableUnits(LocalDate startDate, LocalDate endDate) {
-
-        timeSlotManager.createTimeSlots(startDate, endDate);
+    public void generateBookableUnits() {
 
         List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
 
-        timeSlotRepository.findAll().stream().filter(timeSlot -> timeSlot.getTimeInterval().getDate().isAfter(LocalDate.now()))
+        timeSlotRepository.findAllWithoutBookableUnits()
                 .forEach(timeSlot ->
                         washerRepository.findAll().stream().filter(Washer::isInOrder)
                                 .forEach(washer -> newlyAvailableBookableUnits.add(

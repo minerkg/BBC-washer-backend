@@ -6,6 +6,7 @@ import com.bcc.washer.domain.ResourceAlreadyExistsException;
 import com.bcc.washer.domain.TimeInterval;
 import com.bcc.washer.domain.TimeSlot;
 import com.bcc.washer.repository.TimeSlotRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -82,6 +83,7 @@ public class TimeSlotManager {
     }
 
 
+    //TODO: isn't working - time to fix it
     public void deleteTimeSlot(Long id) {
         timeSlotRepository.deleteById(id);
     }

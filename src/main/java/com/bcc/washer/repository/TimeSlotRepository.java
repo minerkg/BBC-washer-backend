@@ -15,4 +15,6 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     @Query("SELECT ts FROM TimeSlot ts WHERE ts.timeInterval.date BETWEEN :from AND :to")
     List<TimeSlot> findAllByDateRange(@Param("from") LocalDate from, @Param("to") LocalDate to);
 
+    @Query("SELECT ts FROM TimeSlot ts WHERE ts.bookableUnit IS EMPTY ")
+    List<TimeSlot> findAllWithoutBookableUnits();
 }

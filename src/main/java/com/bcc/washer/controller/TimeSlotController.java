@@ -26,7 +26,8 @@ public class TimeSlotController {
 
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<Set<TimeSlot>>> getAllAvailableBookableUnits(@RequestBody BetweenDatesRequest betweenDatesRequest) {
+    public ResponseEntity<ApiResponse<Set<TimeSlot>>> getAllAvailableTimeSlotsBetweenDates(
+            @RequestBody BetweenDatesRequest betweenDatesRequest) {
         try {
             logger.info("---  getAllTimeSlots method accessed  ---");
             return ResponseEntity.ok()
