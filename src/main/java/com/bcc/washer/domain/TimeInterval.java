@@ -28,10 +28,6 @@ public class TimeInterval {
     private TimeSlot timeSlot;
 
 
-    public boolean equals(TimeInterval that) {
-        if (this == that) return true;
-        if (that == null) return false;
-        return this.startTime.equals(that.startTime) && this.endTime.equals(that.endTime);
-    }
+
 
 }

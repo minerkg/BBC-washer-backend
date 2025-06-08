@@ -28,11 +28,6 @@ public class TimeSlot {
     private List<BookableUnit> bookableUnit;
 
 
-    public boolean equals(TimeSlot that) {
-        if (this == that) return true;
-        if (that == null) return false;
-        return this.getTimeInterval().equals(that.getTimeInterval());
-    }
 
 
 }

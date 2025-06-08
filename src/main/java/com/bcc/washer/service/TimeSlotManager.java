@@ -29,8 +29,8 @@ public class TimeSlotManager {
         return timeSlotRepository.findAll();
     }
 
-    @Transactional
-    public List<TimeSlot> createTimeSlots(LocalDate timeSlotStartDayFrom, LocalDate to, List<BookableUnit> bookableUnits) {
+
+    public List<TimeSlot> createTimeSlots(LocalDate timeSlotStartDayFrom, LocalDate to) {
 
         //if there is no available timeslot than it generates one with startsDay := from -1
         TimeSlot latestExistingTimeSlot = getLatestExistingTimeSlot(timeSlotStartDayFrom);
@@ -57,7 +57,7 @@ public class TimeSlotManager {
                                 .endTime(timeIntervalStart.plusHours(1))
                                 .date(date)
                                 .build())
-                        .bookableUnit(bookableUnits)
+                        .bookableUnit(new ArrayList<>())
                         .build();
                 newlyAvailableTimeSlots.add(newTimeSlot);
             }
