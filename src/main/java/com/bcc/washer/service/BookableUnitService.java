@@ -63,9 +63,9 @@ public class BookableUnitService {
 
 
 
-    public void generateBookableUnits() {
+    public void generateBookableUnits(LocalDate startDate, LocalDate endDate) {
 
-        timeSlotManager.createTimeSlots(LocalDate.now(), LocalDate.now().plusDays(3));
+        timeSlotManager.createTimeSlots(startDate, endDate);
 
         List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
 
@@ -82,7 +82,6 @@ public class BookableUnitService {
 
                 );
         bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
-
 
     }
 
