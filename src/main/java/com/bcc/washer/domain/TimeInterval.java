@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class TimeInterval {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -26,5 +26,11 @@ public class TimeInterval {
     @OneToOne(mappedBy = "timeInterval", cascade = CascadeType.ALL)
     private TimeSlot timeSlot;
 
+
+    public boolean equals(TimeInterval that) {
+        if (this == that) return true;
+        if (that == null) return false;
+        return this.startTime.isEqual(that.startTime) && this.endTime.isEqual(that.endTime);
+    }
 
 }

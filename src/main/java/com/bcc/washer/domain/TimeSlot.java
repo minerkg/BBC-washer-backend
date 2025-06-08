@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Entity
@@ -25,5 +26,13 @@ public class TimeSlot {
     @JsonIgnore
     @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookableUnit> bookableUnit;
+
+
+    public boolean equals(TimeSlot that) {
+        if (this == that) return true;
+        if (that == null) return false;
+        return this.getTimeInterval().equals(that.getTimeInterval());
+    }
+
 
 }
