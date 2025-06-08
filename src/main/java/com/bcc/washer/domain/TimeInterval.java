@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Builder
@@ -18,8 +19,8 @@ public class TimeInterval {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private LocalDate date;
 
     @JsonIgnore
@@ -30,7 +31,7 @@ public class TimeInterval {
     public boolean equals(TimeInterval that) {
         if (this == that) return true;
         if (that == null) return false;
-        return this.startTime.isEqual(that.startTime) && this.endTime.isEqual(that.endTime);
+        return this.startTime.equals(that.startTime) && this.endTime.equals(that.endTime);
     }
 
 }
