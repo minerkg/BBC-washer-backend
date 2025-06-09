@@ -1,20 +1,16 @@
-// src/main/java/com/bcc/washer/service/BookableUnitService.java
 package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
-import com.bcc.washer.domain.time.TimeInterval;
-import com.bcc.washer.domain.time.TimeSlot;
 import com.bcc.washer.domain.washer.WasherStatus;
 import com.bcc.washer.repository.BookableUnitRepository;
-import com.bcc.washer.repository.TimeIntervalRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,9 +30,10 @@ public class BookableUnitService {
     private TimeSlotRepository timeSlotRepository;
 
     @Autowired
-    private TimeIntervalRepository timeIntervalRepository;
+    private TimeSlotManager timeSlotManager;
 
 
+    // TODO: pageable needed
     public Set<BookableUnit> getAllAvailableBookableUnits() {
         return bookableUnitRepository.findAll()
                 .stream()
@@ -45,6 +42,7 @@ public class BookableUnitService {
 
     }
 
+    // TODO: for the next week
     public Set<BookableUnit> getAllAvailableBookableUnitsWithinOneWeek() {
         LocalDate today = LocalDate.now();
         LocalDate oneWeekLater = today.plusDays(7);
@@ -55,31 +53,25 @@ public class BookableUnitService {
 
     }
 
-    @Transactional
+
     public void generateBookableUnits() {
-        List<TimeInterval> futureTimeIntervals = timeIntervalRepository.findAll()
-                .stream().filter(timeInterval ->
-                                timeInterval.getDate().isAfter(LocalDate.now())
-                        /*&& timeInterval.getTimeSlot() != null*/)
-                .toList();
-        futureTimeIntervals.forEach(ti -> timeSlotRepository.save(TimeSlot.builder().timeInterval(ti).build()));
 
-        var futureTimeSlotList = timeSlotRepository.findAll();
+        List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
 
-        // FIX: Changed Washer::isInOrder to check for WasherStatus.AVAILABLE
-        washerRepository.findAll().stream()
-                .filter(washer -> washer.getStatus() == WasherStatus.AVAILABLE) // Changed condition here
-                .forEach(washer ->
-                        futureTimeSlotList.forEach(timeSlot ->
-                                bookableUnitRepository.save(
+        timeSlotRepository.findAllWithoutBookableUnits()
+                .forEach(timeSlot ->
+                        washerRepository.findAll().stream().filter(washer -> washer.getStatus().equals(WasherStatus.AVAILABLE))
+                                .forEach(washer -> newlyAvailableBookableUnits.add(
                                         BookableUnit.builder()
                                                 .isAvailable(true)
                                                 .timeSlot(timeSlot)
                                                 .washer(washer)
                                                 .build())
+                                )
 
-                        )
                 );
+        bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
+
     }
 
 
