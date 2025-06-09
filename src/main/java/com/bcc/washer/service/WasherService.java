@@ -1,4 +1,3 @@
-// src/main/java/com/bcc/washer/service/WasherService.java
 package com.bcc.washer.service;
 
 import com.bcc.washer.domain.washer.Washer;
@@ -16,6 +15,11 @@ public class WasherService {
     @Autowired
     private WasherRepository washerRepository;
 
+
+    //TODO: create washer - new bookable units available
+    //TODO: delete washer - delete relating bookable units
+    //TODO: status update is Available -> effect on bookableUnits
+
     @Autowired
     private ReservationRepository reservationRepository; // Inject ReservationRepository
 
@@ -26,6 +30,7 @@ public class WasherService {
         }
         return washerRepository.save(washer);
     }
+
 
     public List<Washer> getAllWashers() {
         return washerRepository.findAll();
