@@ -3,6 +3,9 @@ package com.bcc.washer.domain;
 import com.bcc.washer.domain.reservation.Reservation;
 import com.bcc.washer.domain.time.TimeSlot;
 import com.bcc.washer.domain.washer.Washer;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,13 +39,12 @@ public class BookableUnit {
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Washer washer;
 
     @ManyToOne(cascade = CascadeType.ALL)
+    @JsonManagedReference
     private TimeSlot timeSlot;
-
-    @OneToOne(mappedBy = "bookableUnit")
-    private Reservation reservation;
 
     private boolean isAvailable;
 

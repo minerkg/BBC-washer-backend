@@ -75,4 +75,9 @@ public class WasherController {
             return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to delete washer", e.getMessage()));
         }
     }
+
+    @GetMapping("/available/all")
+    public ResponseEntity<ApiResponse<List<Washer>>> getAllAvailableWashers(){
+        return ResponseEntity.ok(new ApiResponse<>("all available washers", washerService.getAllAvailableWashers()));
+    }
 }

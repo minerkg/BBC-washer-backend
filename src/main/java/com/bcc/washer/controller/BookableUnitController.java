@@ -3,6 +3,7 @@ package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.ResourceAlreadyExistsException;
+import com.bcc.washer.dto.BookableUnitDTO;
 import com.bcc.washer.service.BookableUnitService;
 import com.bcc.washer.service.ReservationService;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -31,7 +33,7 @@ public class BookableUnitController {
 
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<Set<BookableUnit>>> getAllAvailableBookableUnits() {
+    public ResponseEntity<ApiResponse<List<BookableUnitDTO>>> getAllAvailableBookableUnits() {
         try {
             logger.info("---  getAllBookableUnits method accessed  ---");
             return ResponseEntity.ok()

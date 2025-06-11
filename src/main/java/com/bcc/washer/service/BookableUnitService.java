@@ -3,9 +3,11 @@ package com.bcc.washer.service;
 
 import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.washer.WasherStatus;
+import com.bcc.washer.dto.BookableUnitDTO;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +34,12 @@ public class BookableUnitService {
     @Autowired
     private TimeSlotManager timeSlotManager;
 
+    @Autowired
+    private ReservationService reservationService;
+
 
     // TODO: pageable needed
+    @Transactional
     public Set<BookableUnit> getAllAvailableBookableUnits() {
         return bookableUnitRepository.findAll()
                 .stream()
@@ -43,14 +49,26 @@ public class BookableUnitService {
     }
 
     // TODO: for the next week
-    public Set<BookableUnit> getAllAvailableBookableUnitsWithinOneWeek() {
+    @Transactional
+    public List<BookableUnitDTO> getAllAvailableBookableUnitsWithinOneWeek() {
         LocalDate today = LocalDate.now();
         LocalDate oneWeekLater = today.plusDays(7);
-        return bookableUnitRepository.findAll()
+        return bookableUnitRepository.findAllAvailableWithinDateRange(today, oneWeekLater)
                 .stream()
-                .filter(bu -> bu.isAvailable() && bu.getTimeSlot().getTimeInterval().getDate().isBefore(oneWeekLater))
-                .collect(Collectors.toSet());
-
+                .filter(BookableUnit::isAvailable)
+                .map(bu -> new BookableUnitDTO(
+                        bu.getId(),
+                        bu.getWasher().getId(),
+                        bu.getWasher().getName(),
+                        bu.getWasher().getCapacity(),
+                        bu.getWasher().getStatus(),
+                        bu.getTimeSlot().getId(),
+                        bu.getTimeSlot().getTimeInterval().getDate(),
+                        bu.getTimeSlot().getTimeInterval().getStartTime(),
+                        bu.getTimeSlot().getTimeInterval().getEndTime(),
+                        true
+                ))
+                .collect(Collectors.toList());
     }
 
 

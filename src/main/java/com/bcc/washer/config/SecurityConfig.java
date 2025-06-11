@@ -79,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/me").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/employee/**").hasRole("EMPLOYEE")
+                        .requestMatchers("/api/v1/reservation/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(basic -> basic.authenticationEntryPoint(customBasicAuthenticationEntryPoint))

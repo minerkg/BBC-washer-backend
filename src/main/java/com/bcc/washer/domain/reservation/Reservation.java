@@ -3,6 +3,7 @@ package com.bcc.washer.domain.reservation;
 
 import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.user.User;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,6 +45,7 @@ public class Reservation {
     private User user;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JsonManagedReference
     private BookableUnit bookableUnit;
 
     @Enumerated(EnumType.STRING) // Store enum as String in DB

@@ -41,6 +41,10 @@ public class WasherService {
                 .orElseThrow(() -> new RuntimeException("Washer not found with ID: " + id));
     }
 
+    public List<Washer> getAllAvailableWashers(){
+        return washerRepository.findAll().stream().filter(washer -> washer.getStatus() == WasherStatus.AVAILABLE).toList();
+    }
+
     public Washer updateWasher(Long id, Washer updatedWasher) {
         Washer existingWasher = washerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Washer not found with ID: " + id));
