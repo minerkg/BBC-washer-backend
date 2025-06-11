@@ -68,6 +68,7 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("Cancellation failed", e.getMessage()));
         }
         catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(new ApiResponse<>("Internal server error", e.getMessage()));
         }
     }

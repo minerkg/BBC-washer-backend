@@ -24,7 +24,7 @@ public class TimeInterval {
     private LocalDate date;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "timeInterval", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "timeInterval")
     private TimeSlot timeSlot;
 
 

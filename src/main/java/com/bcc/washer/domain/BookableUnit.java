@@ -42,7 +42,7 @@ public class BookableUnit {
     @JsonManagedReference
     private Washer washer;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(optional = true)
     @JsonManagedReference
     private TimeSlot timeSlot;
 

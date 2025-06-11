@@ -13,7 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user") //
 public class ResourceController {
 
-    // Returns user profile info !TODO: need a dto here !
+
+    @GetMapping("/resource/test") // This will result in /user/resource/test
+    public ResponseEntity<ApiResponse<String>> getTest() {
+        return ResponseEntity.ok(new ApiResponse<>("test", "test" ));
+    }
+
+    // Your new /user/me endpoint
     @GetMapping("/me") // This will result in /user/me
     public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         User user = (User) userDetails;

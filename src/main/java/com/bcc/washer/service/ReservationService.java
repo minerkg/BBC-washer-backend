@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ public class ReservationService {
     @Autowired
     private TimeSlotRepository timeSlotRepository;
 
+
     private static final List<TimeSlotOptionDTO> AVAILABLE_TIME_SLOTS = Arrays.asList(
             new TimeSlotOptionDTO(LocalTime.of(8, 0), LocalTime.of(9, 0)),
             new TimeSlotOptionDTO(LocalTime.of(9, 0), LocalTime.of(10, 0)),
@@ -64,6 +66,7 @@ public class ReservationService {
 
         List<BookableUnit> bookedUnits = bookableUnitRepository.findByWasherIdAndDate(washerId, date);
         Set<String> bookedTimes = bookedUnits.stream()
+                .filter(bu -> !bu.isAvailable())
                 .map(bu -> {
                     TimeInterval ti = bu.getTimeSlot().getTimeInterval();
                     return ti.getStartTime().toString() + "-" + ti.getEndTime().toString();
@@ -85,19 +88,25 @@ public class ReservationService {
         // Check if slot is available
         List<BookableUnit> existingUnits = bookableUnitRepository.findByWasherIdAndDate(washerId, date);
         boolean isBooked = existingUnits.stream().anyMatch(bu -> {
-            TimeInterval ti = bu.getTimeSlot().getTimeInterval();
-            return ti.getStartTime().equals(startTime) && ti.getEndTime().equals(endTime);
+            if (bu.getTimeSlot().getTimeInterval()!=null){
+                TimeInterval ti = bu.getTimeSlot().getTimeInterval();
+                return ti.getStartTime().equals(startTime) && ti.getEndTime().equals(endTime);
+            }
+            return true;
+
         });
         if (isBooked) {
             throw new IllegalStateException("Time slot is already booked");
         }
 
         // Create TimeInterval
-        TimeInterval timeInterval = new TimeInterval();
-        timeInterval.setDate(date);
-        timeInterval.setStartTime(startTime);
-        timeInterval.setEndTime(endTime);
-        timeInterval = timeIntervalRepository.save(timeInterval);
+        TimeInterval timeInterval = timeIntervalRepository.findByStartTimeAndEndTime(startTime,endTime);
+        System.out.println(timeInterval);
+//
+//        timeInterval.setDate(date);
+//        timeInterval.setStartTime(startTime);
+//        timeInterval.setEndTime(endTime);
+//        timeInterval = timeIntervalRepository.save(timeInterval);
 
         // Create TimeSlot
         TimeSlot timeSlot = new TimeSlot();
@@ -119,30 +128,7 @@ public class ReservationService {
     }
 
 
-    @Transactional
-    public Reservation makeReservation(Long bookableUnitId, Long userId) {
-        var bookableUnit = bookableUnitRepository.findById(bookableUnitId)
-                .orElseThrow(() -> new WasherStoreException("Bookable Unit not found with ID: " + bookableUnitId));
 
-        if (!bookableUnit.isAvailable()) {
-            throw new BookableUnitNotAvailableException("Bookable Unit with ID: " + bookableUnitId + " is not available.");
-        }
-
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
-
-        // Mark the bookable unit as unavailable
-        bookableUnit.setAvailable(false);
-        bookableUnitRepository.save(bookableUnit); // Save the updated bookable unit
-
-        Reservation newReservation = Reservation.builder()
-                .user(user)
-                .bookableUnit(bookableUnit)
-                .status(ReservationStatus.CONFIRMED) // Set initial status
-                .build();
-
-        return reservationRepository.save(newReservation);
-    }
 
     public Set<Reservation> findAllByUser(Long userId) {
         userRepository.findById(userId)
@@ -166,12 +152,35 @@ public class ReservationService {
         }
 
         BookableUnit bookableUnit = reservation.getBookableUnit();
-        if (bookableUnit != null) {
-            bookableUnit.setAvailable(true); // Make the bookable unit available again
-            bookableUnitRepository.save(bookableUnit);
+        if (bookableUnit == null) {
+
+            reservation.setStatus(ReservationStatus.CANCELLED);
+            reservationRepository.save(reservation);
+            return;
         }
-        reservation.setStatus(ReservationStatus.CANCELLED); // Set status to CANCELLED
-        reservationRepository.save(reservation); // Save the updated reservation instead of deleting
+
+        TimeSlot timeSlot = bookableUnit.getTimeSlot();
+
+
+        // Update bookable unit
+        bookableUnit.setTimeSlot(null);
+        bookableUnit.setAvailable(true);
+        bookableUnitRepository.save(bookableUnit);
+
+        // Update reservation status
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
+
+        if (timeSlot != null) {
+            TimeInterval interval = timeSlot.getTimeInterval();
+
+            if (interval != null) {
+                interval.setTimeSlot(null); // 🔥 Rupe relația inversă
+                timeSlot.setTimeInterval(null); // 🔥 Rupe relația directă
+                timeIntervalRepository.save(interval); // 🔥 Salvează modificarea
+            }
+            timeSlotRepository.delete(timeSlot); // 🔥 Acum se poate șterge
+        }
     }
 
     // New method for admin to view all reservations
