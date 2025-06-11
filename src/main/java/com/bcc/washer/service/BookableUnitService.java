@@ -2,7 +2,6 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
-import com.bcc.washer.domain.washer.WasherStatus;
 import com.bcc.washer.dto.BookableUnitDTO;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,27 +68,4 @@ public class BookableUnitService {
                 ))
                 .collect(Collectors.toList());
     }
-
-
-    public void generateBookableUnits() {
-
-        List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
-
-        timeSlotRepository.findAllWithoutBookableUnits()
-                .forEach(timeSlot ->
-                        washerRepository.findAll().stream().filter(washer -> washer.getStatus().equals(WasherStatus.AVAILABLE))
-                                .forEach(washer -> newlyAvailableBookableUnits.add(
-                                        BookableUnit.builder()
-                                                .isAvailable(true)
-                                                .timeSlot(timeSlot)
-                                                .washer(washer)
-                                                .build())
-                                )
-
-                );
-        bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
-
-    }
-
-
 }

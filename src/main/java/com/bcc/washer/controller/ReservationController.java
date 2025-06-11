@@ -4,10 +4,9 @@ package com.bcc.washer.controller;
 import com.bcc.washer.domain.reservation.Reservation;
 import com.bcc.washer.domain.user.User;
 import com.bcc.washer.dto.TimeSlotOptionDTO;
-import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
 import com.bcc.washer.exceptions.ReservationNotFoundException;
 import com.bcc.washer.exceptions.UserNotFoundException;
-import com.bcc.washer.exceptions.WasherStoreException; // Import if not already
+import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List; // Changed from Set to List for findAllReservations
+import java.util.List;
 import java.util.Set;
 
 @RestController

@@ -3,12 +3,16 @@ package com.bcc.washer.service;
 
 import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.reservation.Reservation;
-import com.bcc.washer.domain.reservation.ReservationStatus; // Import the new enum
+import com.bcc.washer.domain.reservation.ReservationStatus;
 import com.bcc.washer.domain.time.TimeInterval;
 import com.bcc.washer.domain.time.TimeSlot;
 import com.bcc.washer.domain.user.User;
 import com.bcc.washer.domain.washer.Washer;
 import com.bcc.washer.dto.TimeSlotOptionDTO;
+import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
+import com.bcc.washer.exceptions.ReservationNotFoundException;
+import com.bcc.washer.exceptions.UserNotFoundException;
+import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,13 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.List; // Changed from Set to List for findAll (can be Set too, just consistency)
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import com.bcc.washer.exceptions.WasherStoreException;
-import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
-import com.bcc.washer.exceptions.UserNotFoundException;
-import com.bcc.washer.exceptions.ReservationNotFoundException;
 
 @Service
 public class ReservationService {

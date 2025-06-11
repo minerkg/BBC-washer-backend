@@ -17,6 +17,7 @@ public class WasherController {
     @Autowired
     private WasherService washerService;
 
+
     @PostMapping
     public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody Washer washer) {
         try {

@@ -1,4 +1,4 @@
-// src/main/java/com/bcc/washer/controller/ResourceController.java
+
 package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.user.User;
@@ -10,17 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user") // Base mapping for user-related endpoints
-public class ResourceController { // Renamed from previous ResourceController for clarity, but use your actual class name.
+@RequestMapping("/user") //
+public class ResourceController {
 
-    // Original /user/resource/test endpoint - combine with /user/me if they were separate files
-    // If this was originally in a different controller, merge it here or ensure that controller exists.
-    @GetMapping("/resource/test") // This will result in /user/resource/test
-    public ResponseEntity<ApiResponse<String>> getTest() {
-        return ResponseEntity.ok(new ApiResponse<>("test", "test" ));
-    }
-
-    // Your new /user/me endpoint
+    // Returns user profile info !TODO: need a dto here !
     @GetMapping("/me") // This will result in /user/me
     public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         User user = (User) userDetails;
