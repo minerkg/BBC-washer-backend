@@ -1,10 +1,10 @@
 package com.bcc.washer.controller;
 
 
-import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.ResourceAlreadyExistsException;
+import com.bcc.washer.dto.BookableUnitDto;
+import com.bcc.washer.dto.BookableUnitDtoConverter;
 import com.bcc.washer.service.BookableUnitService;
-import com.bcc.washer.service.ReservationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @RestController
@@ -26,17 +27,24 @@ public class BookableUnitController {
     @Autowired
     private BookableUnitService bookableUnitService;
 
+    @Autowired
+    private BookableUnitDtoConverter bookableUnitDtoConverter;
+
+
     //TODO: get all pagable method
 
 
-
     @GetMapping("")
-    public ResponseEntity<ApiResponse<Set<BookableUnit>>> getAllAvailableBookableUnits() {
+    public ResponseEntity<ApiResponse<Set<BookableUnitDto>>> getAllAvailableBookableUnits() {
         try {
             logger.info("---  getAllBookableUnits method accessed  ---");
+            var bookableUnits = bookableUnitService.getAllAvailableBookableUnits();
+            var bookableUnitDtoList = bookableUnitDtoConverter.convertModelListToDtoList(bookableUnits.stream().toList());
             return ResponseEntity.ok()
-                    .body(new ApiResponse<>("all bookable units",
-                            bookableUnitService.getAllAvailableBookableUnitsWithinOneWeek())
+                    .body(
+                            new ApiResponse<>("all bookable units",
+                                    new HashSet<>(bookableUnitDtoList)
+                            )
                     );
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
