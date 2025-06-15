@@ -16,7 +16,7 @@ public class ReservationDtoConverter extends BaseConverter<Reservation, Reservat
     }
 
     @Override
-    ReservationDto convertModelToDto(Reservation reservation) {
+    public ReservationDto convertModelToDto(Reservation reservation) {
         return ReservationDto.builder()
                 .id(reservation.getId())
                 .user(userDtoConverter.convertModelToDto(reservation.getUser()))

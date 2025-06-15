@@ -11,7 +11,7 @@ public class UserDtoConverter extends BaseConverter<User, UserDto>{
     }
 
     @Override
-    UserDto convertModelToDto(User user) {
+    public UserDto convertModelToDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())

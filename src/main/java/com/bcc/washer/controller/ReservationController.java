@@ -2,6 +2,8 @@
 package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.reservation.Reservation;
+import com.bcc.washer.dto.ReservationDto;
+import com.bcc.washer.dto.ReservationDtoConverter;
 import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
 import com.bcc.washer.exceptions.ReservationNotFoundException;
 import com.bcc.washer.exceptions.UserNotFoundException;
@@ -22,10 +24,15 @@ public class ReservationController {
     @Autowired
     private ReservationService reservationService;
 
+    @Autowired
+    private ReservationDtoConverter reservationDtoConverter;
+
     @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<Set<Reservation>>> getAllReservationByUser(@PathVariable("userId") Long userId) {
+    public ResponseEntity<ApiResponse<Set<ReservationDto>>> getAllReservationByUser(@PathVariable("userId") Long userId) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>("All active reservations of the client", reservationService.findAllByUser(userId)));
+            var reservatons = reservationService.findAllByUser(userId);
+            var reservationDtoList = reservationDtoConverter.
+            return ResponseEntity.ok(new ApiResponse<>("All active reservations of the client", ));
         } catch (UserNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("User not found", null));
         } catch (Exception e) {
