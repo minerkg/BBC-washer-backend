@@ -2,7 +2,9 @@ package com.bcc.washer.dto;
 
 import com.bcc.washer.domain.reservation.Reservation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ReservationDtoConverter extends BaseConverter<Reservation, ReservationDto> {
 
     @Autowired

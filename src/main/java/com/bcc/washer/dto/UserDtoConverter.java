@@ -1,7 +1,9 @@
 package com.bcc.washer.dto;
 
 import com.bcc.washer.domain.user.User;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UserDtoConverter extends BaseConverter<User, UserDto>{
     @Override
     User convertDtoToModel(UserDto dto) {
