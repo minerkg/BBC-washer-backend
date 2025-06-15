@@ -14,6 +14,6 @@ import lombok.NoArgsConstructor;
 public class ReservationDto {
     private Long id;
     private UserDto user;
-    private BookableUnit bookableUnit;
+    private BookableUnitDto bookableUnit;
     private ReservationStatus status;
 }

@@ -10,6 +10,9 @@ public class ReservationDtoConverter extends BaseConverter<Reservation, Reservat
     @Autowired
     private UserDtoConverter userDtoConverter;
 
+    @Autowired
+    private BookableUnitDtoConverter bookableUnitDtoConverter;
+
     @Override
     Reservation convertDtoToModel(ReservationDto dto) {
         return null;
@@ -20,7 +23,7 @@ public class ReservationDtoConverter extends BaseConverter<Reservation, Reservat
         return ReservationDto.builder()
                 .id(reservation.getId())
                 .user(userDtoConverter.convertModelToDto(reservation.getUser()))
-                .bookableUnit(reservation.getBookableUnit())
+                .bookableUnit(bookableUnitDtoConverter.convertModelToDto(reservation.getBookableUnit()))
                 .status(reservation.getStatus())
                 .build();
     }
