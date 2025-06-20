@@ -16,7 +16,8 @@ import lombok.*;
         name = "BookableUnit.withAllData",
         attributeNodes = {
                 @NamedAttributeNode(value = "washer"),
-                @NamedAttributeNode(value = "timeSlot", subgraph = "timeSlot-subgraph")
+                @NamedAttributeNode(value = "timeSlot", subgraph = "timeSlot-subgraph"),
+                @NamedAttributeNode(value = "reservation", subgraph = "reservation-subgraph")
         },
 
         subgraphs = {
@@ -24,6 +25,12 @@ import lombok.*;
                         name = "timeSlot-subgraph",
                         attributeNodes = {
                                 @NamedAttributeNode(value = "timeInterval")
+                        }
+                ),
+                @NamedSubgraph(
+                        name = "reservation-subgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode(value = "user") // Assuming Reservation has a User field
                         }
                 )
 
