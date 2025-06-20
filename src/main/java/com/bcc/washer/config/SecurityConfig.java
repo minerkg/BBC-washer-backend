@@ -34,12 +34,6 @@ import org.springframework.http.HttpMethod;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public BasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint() {
-        BasicAuthenticationEntryPoint entryPoint = new BasicAuthenticationEntryPoint();
-        entryPoint.setRealmName("washer-realm");
-        return entryPoint;
-    }
 
     @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
@@ -57,8 +51,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            AuthenticationManager authenticationManager,
-            BasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint
+            AuthenticationManager authenticationManager
     ) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -67,9 +60,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                         .sessionFixation().none()
                 )
-                .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(customBasicAuthenticationEntryPoint)
-                )
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
@@ -81,7 +72,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/employee/**").hasRole("EMPLOYEE")
                         .anyRequest().authenticated()
                 )
-                .httpBasic(basic -> basic.authenticationEntryPoint(customBasicAuthenticationEntryPoint))
                 .authenticationManager(authenticationManager);
 
         return http.build();
