@@ -107,16 +107,22 @@ public class BookableUnitService {
                 });
             }
             case "DELETE" -> {
-
+                CompletableFuture.supplyAsync(() -> {
+                            return "";
+                        }
+                );
                 //TODO: notify
             }
             case "STATUS-UPDATE" -> {
-
+                CompletableFuture.supplyAsync(() -> {
+                    return "";
+                });
                 //TODO: notify
             }
             default -> throw new WasherStoreException("BookableUnit update error after washer change");
 
 
         }
+        return CompletableFuture.supplyAsync(() -> "");
     }
 }
