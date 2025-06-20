@@ -3,12 +3,12 @@ package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.TemplateTYPE;
 import com.bcc.washer.domain.washer.Washer;
-<<<<<<< HEAD
+
 import com.bcc.washer.service.EmailServiceImpl;
 import com.bcc.washer.service.NotificationServiceI;
-=======
+
 import com.bcc.washer.domain.washer.WasherStatus;
->>>>>>> a32c5d3 (washer update effects added)
+
 import com.bcc.washer.service.WasherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
