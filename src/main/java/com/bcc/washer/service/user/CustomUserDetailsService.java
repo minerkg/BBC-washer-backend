@@ -16,7 +16,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder; // Correctly injected PasswordEncoder
 
-    @Autowired // Constructor injection for dependencies
+    @Autowired
     public CustomUserDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -24,9 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Find the user from the database
-        // Spring Security's DaoAuthenticationProvider will use the injected PasswordEncoder
-        // to compare the raw password with the encoded password returned by user.getPassword()
+
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
