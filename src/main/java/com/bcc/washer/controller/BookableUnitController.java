@@ -59,7 +59,8 @@ public class BookableUnitController {
         } catch (ResourceAlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>("error", e.getMessage()));
         }
 
     }
