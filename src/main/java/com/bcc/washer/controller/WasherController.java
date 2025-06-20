@@ -1,14 +1,19 @@
 
 package com.bcc.washer.controller;
 
+import com.bcc.washer.domain.TemplateTYPE;
 import com.bcc.washer.domain.washer.Washer;
+import com.bcc.washer.service.EmailServiceImpl;
+import com.bcc.washer.service.NotificationServiceI;
 import com.bcc.washer.service.WasherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/admin/washers")
@@ -16,6 +21,9 @@ public class WasherController {
 
     @Autowired
     private WasherService washerService;
+    @Autowired
+    @Qualifier("emailNotificationService")
+    private NotificationServiceI notificationServiceI;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody Washer washer) {
