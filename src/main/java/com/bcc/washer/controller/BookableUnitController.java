@@ -10,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
@@ -62,9 +59,12 @@ public class BookableUnitController {
         } catch (ResourceAlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>("error", e.getMessage()));
         }
+
     }
+
 
 
     @GetMapping("/by-date")
@@ -83,7 +83,6 @@ public class BookableUnitController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
 
 
 }
