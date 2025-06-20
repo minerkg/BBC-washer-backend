@@ -86,7 +86,7 @@ public class WasherController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/status-update/{id}")
     public ResponseEntity<ApiResponse<Washer>> updateWasherStatus(
             @PathVariable Long id,
             @RequestParam("newStatus") WasherStatus newStatus) {
