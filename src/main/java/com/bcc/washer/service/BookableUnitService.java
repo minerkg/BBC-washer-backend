@@ -2,7 +2,9 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
+import com.bcc.washer.domain.washer.Washer;
 import com.bcc.washer.domain.washer.WasherStatus;
+import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,15 +38,11 @@ public class BookableUnitService {
 
 
     // TODO: pageable needed
-    public Set<BookableUnit> getAllAvailableBookableUnits() {
-        return bookableUnitRepository.findAll()
-                .stream()
-                .filter(BookableUnit::isAvailable)
-                .collect(Collectors.toSet());
+    public Set<BookableUnit> getAllBookableUnits() {
+        return new HashSet<>(bookableUnitRepository.findAll());
 
     }
 
-    // TODO: for the next week
     public Set<BookableUnit> getAllAvailableBookableUnitsWithinOneWeek() {
         LocalDate today = LocalDate.now();
         LocalDate oneWeekLater = today.plusDays(7);
@@ -90,4 +89,34 @@ public class BookableUnitService {
                 .values());
     }
 
+    public CompletableFuture<String> updateBookableUnitsAfterWasherChange(Washer washer, String payload) {
+        switch (payload) {
+            case "ADD" -> {
+                List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
+                CompletableFuture.supplyAsync(() -> {
+                    timeSlotRepository.findAll().stream()
+                            .filter(ts -> ts.getTimeInterval().getDate().isAfter(LocalDate.now()))
+                            .forEach(ts -> newlyAvailableBookableUnits.add(
+                                    BookableUnit.builder()
+                                            .isAvailable(true)
+                                            .timeSlot(ts)
+                                            .washer(washer)
+                                            .build()));
+                    return "Bookable unit add finished after washer add";
+                });
+                //TODO: notify
+            }
+            case "DELETE" -> {
+
+                //TODO: notify
+            }
+            case "STATUS-UPDATE" -> {
+
+                //TODO: notify
+            }
+            default -> throw new WasherStoreException("BookableUnit update error after washer change");
+
+
+        }
+    }
 }

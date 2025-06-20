@@ -3,8 +3,12 @@ package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.TemplateTYPE;
 import com.bcc.washer.domain.washer.Washer;
+<<<<<<< HEAD
 import com.bcc.washer.service.EmailServiceImpl;
 import com.bcc.washer.service.NotificationServiceI;
+=======
+import com.bcc.washer.domain.washer.WasherStatus;
+>>>>>>> a32c5d3 (washer update effects added)
 import com.bcc.washer.service.WasherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -81,4 +85,17 @@ public class WasherController {
             return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to delete washer", e.getMessage()));
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Washer>> updateWasherStatus(
+            @PathVariable Long id,
+            @RequestParam("newStatus") WasherStatus newStatus) {
+        try {
+            Washer updatedWasher = washerService.updateWasherStatus(id, newStatus);
+            return ResponseEntity.ok(new ApiResponse<>("The washer's status successfully updated", updatedWasher));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Washer not found", null));
+        }
+    }
+
 }
