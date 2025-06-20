@@ -2,7 +2,9 @@
 package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.user.User;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +19,12 @@ public class ResourceController { // Renamed from previous ResourceController fo
     // If this was originally in a different controller, merge it here or ensure that controller exists.
     @GetMapping("/resource/test") // This will result in /user/resource/test
     public ResponseEntity<ApiResponse<String>> getTest() {
-        return ResponseEntity.ok(new ApiResponse<>("test", "test" ));
+        try {
+            return ResponseEntity.ok(new ApiResponse<>("test", "test" ));
+        }catch (AuthenticationException aue){
+            return new ResponseEntity<>(new ApiResponse<>(HttpStatus.UNAUTHORIZED.toString(), aue.getMessage() ), HttpStatus.UNAUTHORIZED);
+        }
+
     }
 
     // Your new /user/me endpoint
