@@ -63,7 +63,7 @@ public class BookableUnitController {
     }
 
     @GetMapping("/by-date")
-    public ResponseEntity<ApiResponse<Set<BookableUnitDto>>> getAllAvailableBookableUnitsByDay(@RequestBody LocalDate localDate) {
+    public ResponseEntity<ApiResponse<Set<BookableUnitDto>>> getAllAvailableBookableUnitsByDay(@RequestParam LocalDate localDate) {
         try {
             logger.info("---  getAllBookableUnitsByDay method accessed  ---");
             var bookableUnits = bookableUnitService.getAllAvailableBookableUnitsWithinOneWeek(localDate);

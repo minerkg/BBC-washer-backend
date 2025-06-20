@@ -19,7 +19,7 @@ public interface BookableUnitRepository extends JpaRepository<BookableUnit, Long
     @EntityGraph(value = "BookableUnit.withAllData")
     List<BookableUnit> findAll();
 
-    @Query("select b from BookableUnit b where BookableUnit.timeSlot.timeInterval.date = :localDate")
+    @Query("select b from BookableUnit b where b.timeSlot.timeInterval.date = :localDate")
     @EntityGraph(value = "BookableUnit.withAllData")
     List<BookableUnit> findAllByDate(@Param("localDate") LocalDate localDate);
 }
