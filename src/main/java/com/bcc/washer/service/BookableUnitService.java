@@ -74,5 +74,14 @@ public class BookableUnitService {
 
     }
 
+    public Set<BookableUnit> getAllAvailableBookableUnitsWithinOneWeek(LocalDate localDate) {
+        LocalDate today = LocalDate.now();
+        LocalDate oneWeekLater = today.plusDays(7);
+        return bookableUnitRepository.findAllByDate(localDate)
+                .stream()
+                .filter(bu -> bu.isAvailable() && bu.getTimeSlot().getTimeInterval().getDate().isBefore(oneWeekLater))
+                .collect(Collectors.toSet());
+
+    }
 
 }
