@@ -102,9 +102,9 @@ public class BookableUnitService {
                                             .timeSlot(ts)
                                             .washer(washer)
                                             .build()));
+                    bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
                     return "Bookable unit add finished after washer add";
                 });
-                //TODO: notify
             }
             case "DELETE" -> {
 
