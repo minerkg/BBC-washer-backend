@@ -72,7 +72,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/employee/**").hasRole("EMPLOYEE")
                         .anyRequest().authenticated()
                 )
-                .authenticationManager(authenticationManager);
+                .authenticationManager(authenticationManager)
+                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
