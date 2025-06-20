@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,7 +40,7 @@ public class BookableUnitController {
     public ResponseEntity<ApiResponse<Set<BookableUnitDto>>> getAllAvailableBookableUnits() {
         try {
             logger.info("---  getAllBookableUnits method accessed  ---");
-            var bookableUnits = bookableUnitService.getAllAvailableBookableUnits();
+            var bookableUnits = bookableUnitService.getAllAvailableBookableUnitsWithinOneWeek();
             var bookableUnitDtoList = bookableUnitDtoConverter.convertModelListToDtoList(bookableUnits.stream().toList());
             return ResponseEntity.ok()
                     .body(
@@ -63,6 +65,25 @@ public class BookableUnitController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
+    @GetMapping("/by-date")
+    public ResponseEntity<ApiResponse<Set<BookableUnitDto>>> getAllAvailableBookableUnitsByDay(@RequestParam LocalDate localDate) {
+        try {
+            logger.info("---  getAllBookableUnitsByDay method accessed  ---");
+            var bookableUnits = bookableUnitService.getAllAvailableBookableUnitsWithinOneWeek(localDate);
+            var bookableUnitDtoList = bookableUnitDtoConverter.convertModelListToDtoList(bookableUnits.stream().toList());
+            return ResponseEntity.ok()
+                    .body(
+                            new ApiResponse<>("all bookable units by date:" + localDate ,
+                                    new HashSet<>(bookableUnitDtoList)
+                            )
+                    );
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 
 
 }
