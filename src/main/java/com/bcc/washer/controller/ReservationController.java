@@ -1,5 +1,6 @@
 package com.bcc.washer.controller;
 
+import com.bcc.washer.domain.TemplateTYPE;
 import com.bcc.washer.domain.reservation.Reservation;
 import com.bcc.washer.dto.ReservationDto;
 import com.bcc.washer.dto.ReservationDtoConverter;
@@ -7,8 +8,10 @@ import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
 import com.bcc.washer.exceptions.ReservationNotFoundException;
 import com.bcc.washer.exceptions.UserNotFoundException;
 import com.bcc.washer.exceptions.WasherStoreException;
+import com.bcc.washer.service.NotificationServiceI;
 import com.bcc.washer.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/reservation")
@@ -26,6 +30,8 @@ public class ReservationController {
 
     @Autowired
     private ReservationDtoConverter reservationDtoConverter;
+
+
 
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<Set<ReservationDto>>> getAllReservationByUser(@PathVariable("userId") Long userId) {
@@ -47,6 +53,7 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationDto>> makeReservation(@RequestParam Long bookableUnitId, @RequestParam Long userId) {
         try {
             Reservation newReservation = reservationService.makeReservation(bookableUnitId, userId);
+
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>("Appointment booked successfully",
                             reservationDtoConverter.convertModelToDto(newReservation)));
