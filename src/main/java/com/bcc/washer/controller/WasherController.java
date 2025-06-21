@@ -25,9 +25,6 @@ public class WasherController {
 
     @Autowired
     private WasherService washerService;
-    @Autowired
-    @Qualifier("emailNotificationService")
-    private NotificationServiceI notificationServiceI;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody Washer washer) {

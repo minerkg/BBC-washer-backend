@@ -9,9 +9,11 @@ import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +37,13 @@ public class BookableUnitService {
 
     @Autowired
     private TimeSlotManager timeSlotManager;
+
+    @Autowired
+    private ReservationService reservationService;
+
+    @Autowired
+    @Qualifier("emailNotificationService")
+    private NotificationServiceI notificationService;
 
 
     // TODO: pageable needed
@@ -108,10 +117,37 @@ public class BookableUnitService {
             }
             case "DELETE" -> {
                 CompletableFuture.supplyAsync(() -> {
+                            //fin all affected bu-s
+                            //reschedule where it is possible
+                            //where there is no chance to reschedule than notify the user
+
+                            bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now()).forEach(
+                                    bu -> {
+                                        if (!bu.isAvailable()) {
+                                            var affectedBookableUnitsTi = bu.getTimeSlot().getTimeInterval();
+                                            timeSlotManager.getAvailableTimeSlotsByDate(affectedBookableUnitsTi.getDate())
+                                                    .stream().filter(ts -> ts.getTimeInterval().getStartTime().getHour()
+                                                            == affectedBookableUnitsTi.getStartTime().getHour())
+                                                    .findFirst().ifPresent(
+                                                            ts -> ts.getBookableUnit().stream()
+                                                                    .filter(BookableUnit::isAvailable)
+                                                                    //if there is no available?bookable unit
+                                                                    .findFirst()
+                                                                    .ifPresent(bookableUnit -> reservationService.makeReservation(
+                                                                            bookableUnit.getId(),
+                                                                            bu.getReservation().getUser().getId()))
+                                                    );
+                                        } else {
+                                            // just delete bu-s where there is no reservation
+                                        }
+                                    }
+                            );
+
+
                             return "";
                         }
                 );
-                //TODO: notify
+                //TODO: notify notificationService
             }
             case "STATUS-UPDATE" -> {
                 CompletableFuture.supplyAsync(() -> {

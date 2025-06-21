@@ -86,4 +86,10 @@ public class TimeSlotManager {
     public void deleteTimeSlot(Long id) {
         timeSlotRepository.deleteById(id);
     }
+
+    public List<TimeSlot> getAvailableTimeSlotsByDate(LocalDate localDate) {
+        return timeSlotRepository.findAllByDate(localDate);
+    }
+
+
 }
