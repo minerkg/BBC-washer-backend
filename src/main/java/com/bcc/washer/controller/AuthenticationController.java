@@ -10,6 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @RestController()
 @RequestMapping("/public/auth")
 @RequiredArgsConstructor
@@ -27,6 +31,30 @@ public class AuthenticationController {
         }catch (WasherStoreException e){
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("user already exists",e.getMessage()));
         }
+    }
+
+    @PostMapping("/register-batch")
+    public ResponseEntity<ApiResponse<?>> registerMultipleUsers(@RequestBody List<UserRegistrationRequest> requests) {
+        List<Object> createdUsers = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        for (UserRegistrationRequest request : requests) {
+            try {
+                var user = userService.registerUser(request);
+                createdUsers.add(user);
+            } catch (WasherStoreException e) {
+                errors.add("Failed to create user '" + request.username() + "': " + e.getMessage());
+            }
+        }
+        ApiResponse<Object> response = new ApiResponse<>(
+                errors.isEmpty() ? "All users created" : "Some users failed",
+                Map.of(
+                        "created", createdUsers,
+                        "errors", errors
+                )
+        );
+        return ResponseEntity
+                .status(errors.isEmpty() ? HttpStatus.OK : HttpStatus.MULTI_STATUS)
+                .body(response);
     }
 
     @PutMapping("/change-password")
