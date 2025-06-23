@@ -1,4 +1,4 @@
 username,password,first_name,last_name,email,phone,nr_matricol,role
-client,$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO,John-client,Doe,jdoe-client@example.com,0741000000,123456,USER
+user,$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO,John-client,Doe,jdoe-client@example.com,0741000000,123456,USER
 admin,$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO,John-admin,Doe,jdoe-admin@example.com,0742000000,123456,ADMIN
 employee,$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO,John-employee,Doe,jdoe-employee@example.com,0743000000,123456,EMPLOYEE

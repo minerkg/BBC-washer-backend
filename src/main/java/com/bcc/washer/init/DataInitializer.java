@@ -1,11 +1,17 @@
 package com.bcc.washer.init;
 
+import com.bcc.washer.controller.TimeSlotController;
 import com.bcc.washer.domain.user.User;
 import com.bcc.washer.domain.user.Role;
+import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -16,12 +22,28 @@ import java.nio.charset.StandardCharsets;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class UserDataInitializer {
+public class DataInitializer implements ApplicationRunner {
+    Logger logger = LoggerFactory.getLogger(TimeSlotController.class);
 
     private final UserRepository userRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
-    @PostConstruct
-    public void initUsersFromCsv() {
+    @Override
+    public void run(ApplicationArguments args) {
+        initUsers();
+//        initTimeSlots();
+    }
+
+    public void initUsers() {
+        long existingUsers = userRepository.count();
+        if (existingUsers > 0) {
+            logger.warn("Skipping user initialization: " + existingUsers + " already exist in the database.");
+            userRepository.findAll().forEach(user -> logger.info("Existing user: " + user.getUsername()));
+            return;
+        } else {
+            logger.info("Starting user initialization");
+        }
+
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new ClassPathResource("default-users.csv").getInputStream(), StandardCharsets.UTF_8))) {
 
@@ -31,13 +53,13 @@ public class UserDataInitializer {
             while ((line = reader.readLine()) != null) {
                 if (!headerSkipped) {
                     headerSkipped = true;
-                    continue; // skip CSV header
+                    continue;
                 }
 
                 String[] parts = line.split(",");
 
                 if (parts.length != 8) {
-                    System.out.println("[dataInit] Invalid user line (wrong column count): "+ line);
+                    logger.error("Invalid user line (wrong column count): " + line);
                     continue;
                 }
 
@@ -54,29 +76,26 @@ public class UserDataInitializer {
                 try {
                     role = Role.valueOf(roleString);
                 } catch (IllegalArgumentException e) {
-                    System.out.println("Unknown role "+ roleString + ", skipping user "+ username);
+                    logger.warn("Unknown role " + roleString + ", skipping user " + username);
                     continue;
                 }
 
-                if (userRepository.findByUsername(username).isEmpty()) {
-                    User user = new User();
-                    user.setUsername(username);
-                    user.setPassword(password);
-                    user.setFirst_name(firstName);
-                    user.setLast_name(lastName);
-                    user.setEmail(email);
-                    user.setPhone(phone);
-                    user.setNr_matricol(nrMatricol);
-                    user.setRole(role);
-                    userRepository.save(user);
-                    System.out.println("[dataInit] Created user "+ username);
-                } else {
-                    System.out.println("️[dataInit] User "+ username +" already exists, skipping user creation");
-                }
+                User user = new User();
+                user.setUsername(username);
+                user.setPassword(password);
+                user.setFirst_name(firstName);
+                user.setLast_name(lastName);
+                user.setEmail(email);
+                user.setPhone(phone);
+                user.setNr_matricol(nrMatricol);
+                user.setRole(role);
+                userRepository.save(user);
+                logger.info("Created user " + username);
+
             }
 
         } catch (Exception e) {
-            System.out.println("[dataInit] Failed to initialize users from CSV" + e);
+            logger.error("Failed to initialize users from CSV" + e);
         }
     }
 }
