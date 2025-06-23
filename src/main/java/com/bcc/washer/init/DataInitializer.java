@@ -1,9 +1,10 @@
 package com.bcc.washer.init;
-
 import com.bcc.washer.controller.TimeSlotController;
+import com.bcc.washer.domain.ResourceAlreadyExistsException;
 import com.bcc.washer.domain.user.User;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.UserRepository;
+import com.bcc.washer.service.TimeSlotManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -25,17 +27,18 @@ public class DataInitializer implements ApplicationRunner {
 
     private final UserRepository userRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final TimeSlotManager timeSlotManager;
 
     @Override
     public void run(ApplicationArguments args) {
         initUsers();
-//        initTimeSlots();
+        initTimeSlots();
     }
 
     public void initUsers() {
         long existingUsers = userRepository.count();
         if (existingUsers > 0) {
-            logger.warn("Skipping user initialization: {} already exist", existingUsers);
+            logger.warn("Skipping user initialization: {} users already exist", existingUsers);
             userRepository.findAll().forEach(user -> logger.info("Existing user: {}", user.getUsername()));
             return;
         } else {
@@ -57,4 +60,20 @@ public class DataInitializer implements ApplicationRunner {
             logger.error("Failed to initialize users from JSON", e);
         }
     }
+
+    private void initTimeSlots() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(6);
+
+        try {
+            timeSlotManager.createTimeSlots(startDate, endDate);
+            logger.info("Time slots initialized from {} to {}", startDate, endDate);
+        } catch (ResourceAlreadyExistsException e) {
+            logger.warn("Skipping slot initialization: time slots already exist for period {} - {}, {}", startDate, endDate, e.getMessage());
+        } catch (Exception e) {
+            logger.error("Failed to initialize time slots", e);
+        }
+    }
+
+
 }
