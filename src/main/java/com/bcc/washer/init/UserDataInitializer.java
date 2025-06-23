@@ -1,49 +1,82 @@
 package com.bcc.washer.init;
 
-import com.bcc.washer.domain.user.Role;
 import com.bcc.washer.domain.user.User;
+import com.bcc.washer.domain.user.Role;
 import com.bcc.washer.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserDataInitializer {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @PostConstruct
-    public void initUsers() {
-        createUserIfNotExists("client", "$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO",
-                "John-client", "Doe", "jdoe-client@example.com", "0741000000", "123456", Role.USER);
+    public void initUsersFromCsv() {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new ClassPathResource("default-users.csv").getInputStream(), StandardCharsets.UTF_8))) {
 
-        createUserIfNotExists("admin", "$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO",
-                "John-admin", "Doe", "jdoe-admin@example.com", "0742000000", "123456", Role.ADMIN);
+            String line;
+            boolean headerSkipped = false;
 
-        createUserIfNotExists("employee", "$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO",
-                "John-employee", "Doe", "jdoe-employee@example.com", "0743000000", "123456", Role.EMPLOYEE);
-    }
+            while ((line = reader.readLine()) != null) {
+                if (!headerSkipped) {
+                    headerSkipped = true;
+                    continue; // skip CSV header
+                }
 
-    private void createUserIfNotExists(String username, String hashedPassword, String firstName,
-                                       String lastName, String email, String phone,
-                                       String nrMatricol, Role role) {
-        if (userRepository.findByUsername(username).isEmpty()) {
-            User user = new User();
-            user.setUsername(username);
-            user.setPassword(hashedPassword);
-            user.setFirst_name(firstName);
-            user.setLast_name(lastName);
-            user.setEmail(email);
-            user.setPhone(phone);
-            user.setNr_matricol(nrMatricol);
-            user.setRole(role);
-            userRepository.save(user);
-            System.out.println("[dataInit] Created default user: <<"+ username + ">>");
-        } else {
-            System.out.println("[dataInit] User <<" + username + ">> already exists, skipping creation");
+                String[] parts = line.split(",");
+
+                if (parts.length != 8) {
+                    System.out.println("[dataInit] Invalid user line (wrong column count): "+ line);
+                    continue;
+                }
+
+                String username = parts[0].trim();
+                String password = parts[1].trim(); // already hashed
+                String firstName = parts[2].trim();
+                String lastName = parts[3].trim();
+                String email = parts[4].trim();
+                String phone = parts[5].trim();
+                String nrMatricol = parts[6].trim();
+                String roleString = parts[7].trim().toUpperCase();
+
+                Role role;
+                try {
+                    role = Role.valueOf(roleString);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Unknown role "+ roleString + ", skipping user "+ username);
+                    continue;
+                }
+
+                if (userRepository.findByUsername(username).isEmpty()) {
+                    User user = new User();
+                    user.setUsername(username);
+                    user.setPassword(password);
+                    user.setFirst_name(firstName);
+                    user.setLast_name(lastName);
+                    user.setEmail(email);
+                    user.setPhone(phone);
+                    user.setNr_matricol(nrMatricol);
+                    user.setRole(role);
+                    userRepository.save(user);
+                    System.out.println("[dataInit] Created user "+ username);
+                } else {
+                    System.out.println("️[dataInit] User "+ username +" already exists, skipping user creation");
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("[dataInit] Failed to initialize users from CSV" + e);
         }
     }
 }
