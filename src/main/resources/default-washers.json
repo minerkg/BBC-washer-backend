@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Washer_1",
+    "capacity": 6,
+    "status": "AVAILABLE"
+  },
+  {
+    "name": "Washer_2",
+    "capacity": 6,
+    "status": "AVAILABLE"
+  },
+  {
+    "name": "Washer_3",
+    "capacity": 6,
+    "status": "AVAILABLE"
+  },
+  {
+    "name": "Washer_4",
+    "capacity": 6,
+    "status": "MAINTENANCE"
+  },
+  {
+    "name": "Washer_5",
+    "capacity": 6,
+    "status": "AVAILABLE"
+  },
+  {
+    "name": "Washer_6",
+    "capacity": 6,
+    "status": "MAINTENANCE"
+  }
+]

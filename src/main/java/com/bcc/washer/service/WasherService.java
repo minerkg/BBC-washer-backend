@@ -2,12 +2,14 @@ package com.bcc.washer.service;
 
 import com.bcc.washer.domain.washer.Washer;
 import com.bcc.washer.domain.washer.WasherStatus;
+import com.bcc.washer.exceptions.WasherAlreadyExistsException;
 import com.bcc.washer.repository.ReservationRepository;
 import com.bcc.washer.repository.WasherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class WasherService {
@@ -61,5 +63,10 @@ public class WasherService {
         washerRepository.deleteById(id);
     }
 
-
+    public void verifyDuplicateWasher(Washer washer) {
+        Optional<Washer> existing = washerRepository.findByName(washer.getName());
+        if (existing.isPresent()) {
+            throw new WasherAlreadyExistsException("Washer with name: " + washer.getName() + " already exists");
+        }
+    }
 }
