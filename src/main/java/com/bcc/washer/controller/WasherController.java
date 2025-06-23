@@ -91,7 +91,9 @@ public class WasherController {
             Washer updatedWasher = washerService.updateWasherStatus(id, newStatus);
             return ResponseEntity.ok(new ApiResponse<>("The washer's status successfully updated", updatedWasher));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Washer not found", null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("error: " +  e.getMessage(), null));
+
         }
     }
 

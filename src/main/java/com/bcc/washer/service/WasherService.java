@@ -66,7 +66,6 @@ public class WasherService {
         try {
             existingWasher.setStatus(newStatus);
             bookableUnitService.updateBookableUnitsAfterWasherChange(existingWasher, "STATUS-UPDATE");
-
         } catch (RuntimeException e) {
             throw new WasherStoreException("Impossible to update the washer's status");
         }
