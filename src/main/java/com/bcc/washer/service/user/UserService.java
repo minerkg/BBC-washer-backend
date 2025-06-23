@@ -72,7 +72,6 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
 
         user.setRole(newRole);
-        userRepository.save(user);
     }
 
     public void changePassword(String username, String currentPassword, String newPassword) {
