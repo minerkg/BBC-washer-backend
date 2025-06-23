@@ -103,57 +103,55 @@ public class BookableUnitService {
             case "ADD" -> {
                 List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
                 CompletableFuture.supplyAsync(() -> {
-                    timeSlotRepository.findAll().stream()
-                            .filter(ts -> ts.getTimeInterval().getDate().isAfter(LocalDate.now()))
-                            .forEach(ts -> newlyAvailableBookableUnits.add(
-                                    BookableUnit.builder()
-                                            .isAvailable(true)
-                                            .timeSlot(ts)
-                                            .washer(washer)
-                                            .build()));
+                    generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBookableUnits);
                     bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
                     return "Bookable unit add finished after washer add";
                 });
             }
-            case "DELETE" -> {
-                CompletableFuture.supplyAsync(() -> {
-                            //fin all affected bu-s
-                            //reschedule where it is possible
-                            //where there is no chance to reschedule than notify the user
-
-                            bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now()).forEach(
-                                    bu -> {
-                                        if (!bu.isAvailable()) {
-                                            var affectedBookableUnitsTi = bu.getTimeSlot().getTimeInterval();
-                                            timeSlotManager.getAvailableTimeSlotsByDate(affectedBookableUnitsTi.getDate())
-                                                    .stream().filter(ts -> ts.getTimeInterval().getStartTime().getHour()
-                                                            == affectedBookableUnitsTi.getStartTime().getHour())
-                                                    .findFirst().ifPresent(
-                                                            ts -> ts.getBookableUnit().stream()
-                                                                    .filter(BookableUnit::isAvailable)
-                                                                    //if there is no available?bookable unit
-                                                                    .findFirst()
-                                                                    .ifPresent(bookableUnit -> reservationService.makeReservation(
-                                                                            bookableUnit.getId(),
-                                                                            bu.getReservation().getUser().getId()))
-                                                    );
-                                        } else {
-                                            // just delete bu-s where there is no reservation
-                                        }
-                                    }
-                            );
-
-
-                            return "";
+            case "DELETE" -> CompletableFuture.supplyAsync(() -> {
+                List<BookableUnit> deletableUnits = new ArrayList<>();
+                List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
+                for (BookableUnit bu : futureUnits) {
+                    if (!bu.isAvailable()) {
+                        boolean rescheduled = tryReschedule(bu);
+                        if (!rescheduled) {
+                            notifyUserOfCancellation(bu);
                         }
-                );
-                //TODO: notify notificationService
-            }
+                    } else {
+                        deletableUnits.add(bu);
+                    }
+                }
+                bookableUnitRepository.deleteAll(deletableUnits);
+                return "Reservations rescheduled and customers notified";
+            });
+
             case "STATUS-UPDATE" -> {
-                CompletableFuture.supplyAsync(() -> {
-                    return "";
-                });
-                //TODO: notify
+                if (washer.getStatus() == WasherStatus.AVAILABLE) {
+                    List<BookableUnit> newlyAvailableBUs = new ArrayList<>();
+                    CompletableFuture.supplyAsync(() -> {
+                        generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBUs);
+                        bookableUnitRepository.saveAll(newlyAvailableBUs);
+                        return "Bookable unit add finished after washer add";
+                    });
+                }
+                if (washer.getStatus() == WasherStatus.MAINTENANCE) {
+                    CompletableFuture.supplyAsync(() -> {
+                        List<BookableUnit> deletableUnits = new ArrayList<>();
+                        List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
+                        for (BookableUnit bu : futureUnits) {
+                            if (!bu.isAvailable()) {
+                                boolean rescheduled = tryReschedule(bu);
+                                if (!rescheduled) {
+                                    notifyUserOfCancellation(bu);
+                                }
+                            } else {
+                                deletableUnits.add(bu);
+                            }
+                        }
+                        bookableUnitRepository.deleteAll(deletableUnits);
+                        return "Reservations rescheduled and customers notified";
+                    });
+                }
             }
             default -> throw new WasherStoreException("BookableUnit update error after washer change");
 
@@ -161,4 +159,35 @@ public class BookableUnitService {
         }
         return CompletableFuture.supplyAsync(() -> "");
     }
+
+    private void generateNewBookableUnitsAfterWasherAdd(Washer washer, List<BookableUnit> newlyAvailableBookableUnits) {
+        timeSlotRepository.findAll().stream()
+                .filter(ts -> ts.getTimeInterval().getDate().isAfter(LocalDate.now()))
+                .forEach(ts -> newlyAvailableBookableUnits.add(
+                        BookableUnit.builder()
+                                .isAvailable(true)
+                                .timeSlot(ts)
+                                .washer(washer)
+                                .build()));
+    }
+
+
+    private boolean tryReschedule(BookableUnit bu) {
+        return bookableUnitRepository.findAllByDate(bu.getTimeSlot().getTimeInterval().getDate()).stream()
+                .filter(BookableUnit::isAvailable)
+                .findFirst()
+                .map(freeBu -> {
+                    reservationService.makeReservation(freeBu.getId(), bu.getReservation().getUser().getId());
+                    return true;
+                }).orElse(false);
+    }
+
+    private void notifyUserOfCancellation(BookableUnit bu) {
+        notificationService.notifyReservation(
+                bu.getReservation().getUser().getEmail(),
+                "Appointment deleted",
+                "Dear user, due to a technical issue with the washer, your reservation cannot be rescheduled.",
+                bu);
+    }
+
 }
