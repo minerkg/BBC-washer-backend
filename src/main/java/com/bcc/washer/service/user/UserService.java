@@ -9,8 +9,13 @@ import com.bcc.washer.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.nio.file.AccessDeniedException;
 
 @Service
 public class UserService {
@@ -57,11 +62,16 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUserRole(Long userId, Role newRole) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+    public void updateUserRole(String username, Role newRole) throws AccessDeniedException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        authentication.getAuthorities().forEach(a -> System.out.println("Authority: " + a.getAuthority()));
+        if (authentication == null || !authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            throw new AccessDeniedException("Only admins can update user roles.");
+        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+
         user.setRole(newRole);
-        return userRepository.save(user);
     }
 
     public void changePassword(String username, String currentPassword, String newPassword) {
