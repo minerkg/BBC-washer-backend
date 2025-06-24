@@ -4,6 +4,8 @@ package com.bcc.washer.controller;
 import com.bcc.washer.domain.TemplateTYPE;
 import com.bcc.washer.domain.washer.Washer;
 
+import com.bcc.washer.exceptions.WasherAlreadyExistsException;
+
 import com.bcc.washer.service.EmailServiceImpl;
 import com.bcc.washer.service.NotificationServiceI;
 
@@ -29,12 +31,22 @@ public class WasherController {
     @PostMapping
     public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody Washer washer) {
         try {
+            washerService.verifyDuplicateWasher(washer);
             Washer newWasher = washerService.addWasher(washer);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("Washer added successfully", newWasher));
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>("Washer added successfully", newWasher));
+        } catch (WasherAlreadyExistsException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to add washer", null));
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("Failed to add washer", null));
         }
     }
+
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Washer>>> getAllWashers() {

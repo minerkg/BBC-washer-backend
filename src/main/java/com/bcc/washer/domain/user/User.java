@@ -2,6 +2,7 @@ package com.bcc.washer.domain.user;
 
 import com.bcc.washer.domain.user.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,7 +28,7 @@ public class User implements UserDetails {
     @Column(unique=true)
     private String username;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable=false)
     private String password;
 
@@ -44,7 +45,7 @@ public class User implements UserDetails {
     private String phone;
     private String nr_matricol;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
     private Role role;
@@ -63,9 +64,6 @@ public class User implements UserDetails {
     public String getUsername() {
         return this.username;
     }
-
-
-
 }
 
 

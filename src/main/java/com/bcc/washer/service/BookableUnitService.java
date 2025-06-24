@@ -2,7 +2,11 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
+
+import com.bcc.washer.domain.time.TimeSlot;
+
 import com.bcc.washer.domain.washer.Washer;
+
 import com.bcc.washer.domain.washer.WasherStatus;
 import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.BookableUnitRepository;
@@ -11,6 +15,7 @@ import com.bcc.washer.repository.WasherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -62,22 +67,26 @@ public class BookableUnitService {
     }
 
 
+    @Transactional
     public void generateBookableUnits() {
 
         List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
 
         timeSlotRepository.findAllWithoutBookableUnits()
-                .forEach(timeSlot ->
+                .forEach(timeSlot ->{
+                        TimeSlot attachedTimeSlot = timeSlotRepository.findById(timeSlot.getId())
+                        .orElseThrow(() -> new IllegalStateException("TimeSlot with ID " + timeSlot.getId() + " not found"));
+
                         washerRepository.findAll().stream().filter(washer -> washer.getStatus().equals(WasherStatus.AVAILABLE))
                                 .forEach(washer -> newlyAvailableBookableUnits.add(
                                         BookableUnit.builder()
                                                 .isAvailable(true)
-                                                .timeSlot(timeSlot)
+                                                .timeSlot(attachedTimeSlot)
                                                 .washer(washer)
                                                 .build())
-                                )
+                                );
 
-                );
+    });
         bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
 
     }
