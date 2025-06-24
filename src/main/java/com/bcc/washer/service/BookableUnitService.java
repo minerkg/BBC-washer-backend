@@ -136,21 +136,25 @@ public class BookableUnitService {
                     bookableUnitRepository.saveAll(newlyAvailableBUs);
 
                 }
-                if (washer.getStatus().equals(WasherStatus.MAINTENANCE)) {
-                    List<BookableUnit> deletableUnits = new ArrayList<>();
-                    List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
-                    for (BookableUnit bu : futureUnits) {
-                        if (!bu.isAvailable()) {
-                            boolean rescheduled = tryReschedule(bu);
-                            if (!rescheduled) {
-                                notifyUserOfCancellation(bu);
+                try {
+                    if (washer.getStatus().equals(WasherStatus.MAINTENANCE)) {
+                        List<BookableUnit> deletableUnits = new ArrayList<>();
+                        List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
+                        for (BookableUnit bu : futureUnits) {
+                            if (!bu.isAvailable()) {
+                                boolean rescheduled = tryReschedule(bu);
+                                if (!rescheduled) {
+                                    notifyUserOfCancellation(bu);
+                                }
+                            } else {
+                                deletableUnits.add(bu);
                             }
-                        } else {
-                            deletableUnits.add(bu);
                         }
-                    }
-                    bookableUnitRepository.deleteAll(deletableUnits);
+                        bookableUnitRepository.deleteAll(deletableUnits);
 
+                    }
+                } catch (Exception e) {
+                    throw new WasherStoreException(e.getMessage());
                 }
             }
             default -> throw new WasherStoreException("BookableUnit update error after washer change");

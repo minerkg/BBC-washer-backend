@@ -1,25 +1,20 @@
 
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.TemplateTYPE;
 import com.bcc.washer.domain.washer.Washer;
 
+import com.bcc.washer.dto.WasherRequest;
 import com.bcc.washer.exceptions.WasherAlreadyExistsException;
-
-import com.bcc.washer.service.EmailServiceImpl;
-import com.bcc.washer.service.NotificationServiceI;
 
 import com.bcc.washer.domain.washer.WasherStatus;
 
 import com.bcc.washer.service.WasherService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/admin/washers")
@@ -29,7 +24,7 @@ public class WasherController {
     private WasherService washerService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody Washer washer) {
+    public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody WasherRequest washer) {
         try {
             washerService.verifyDuplicateWasher(washer);
             Washer newWasher = washerService.addWasher(washer);
@@ -43,7 +38,7 @@ public class WasherController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>("Failed to add washer", null));
+                    .body(new ApiResponse<>("Failed to add washer: " + e.getMessage(), null));
         }
     }
 
