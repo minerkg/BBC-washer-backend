@@ -42,10 +42,10 @@ public class BookableUnit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     private Washer washer;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     private TimeSlot timeSlot;
 
     @OneToOne(mappedBy = "bookableUnit")
