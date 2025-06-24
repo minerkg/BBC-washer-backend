@@ -4,8 +4,10 @@ import com.bcc.washer.controller.TimeSlotController;
 import com.bcc.washer.domain.ResourceAlreadyExistsException;
 import com.bcc.washer.domain.user.User;
 import com.bcc.washer.domain.washer.Washer;
+import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.UserRepository;
 import com.bcc.washer.repository.WasherRepository;
+import com.bcc.washer.service.BookableUnitService;
 import com.bcc.washer.service.TimeSlotManager;
 import com.bcc.washer.service.WasherService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -37,11 +39,14 @@ public class DataInitializer implements ApplicationRunner {
     private final WasherRepository washerRepository;
     private final WasherService washerService;
 
+    private final BookableUnitService bookableUnitService;
+
     @Override
     public void run(ApplicationArguments args) {
         initUsers();
         initTimeSlots();
         initWashers();
+        initBookableUnits();
     }
 
     public void initUsers() {
@@ -111,6 +116,15 @@ public class DataInitializer implements ApplicationRunner {
 
         } catch (Exception e) {
             logger.error("Failed to initialize washers", e);
+        }
+    }
+
+    private void initBookableUnits() {
+        try {
+            bookableUnitService.generateBookableUnits();
+            logger.info("Bookable units initialized");
+        } catch (Exception e) {
+            logger.error("Failed to initialize bookable units", e);
         }
     }
 
