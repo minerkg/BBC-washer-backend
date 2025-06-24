@@ -12,6 +12,8 @@ import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,7 @@ public class BookableUnitService {
     @Qualifier("emailNotificationService")
     private NotificationServiceI notificationService;
 
+    private Logger logger = LoggerFactory.getLogger(BookableUnitService.class);
 
     // TODO: pageable needed
     public Set<BookableUnit> getAllBookableUnits() {
@@ -154,6 +157,7 @@ public class BookableUnitService {
 
                     }
                 } catch (Exception e) {
+                    logger.error(e.getMessage());
                     throw new WasherStoreException(e.getMessage());
                 }
             }

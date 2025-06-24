@@ -8,6 +8,8 @@ import com.bcc.washer.exceptions.WasherAlreadyExistsException;
 import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.WasherRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ public class WasherService {
 
     @Autowired
     private BookableUnitService bookableUnitService;
+
+    private Logger logger = LoggerFactory.getLogger(WasherService.class);
 
 
     public Washer addWasher(WasherRequest washer) {
@@ -86,6 +90,7 @@ public class WasherService {
             existingWasher.setStatus(newStatus);
             bookableUnitService.updateBookableUnitsAfterWasherChange(existingWasher, "STATUS-UPDATE");
         } catch (RuntimeException e) {
+            logger.error(e.getMessage());
             throw new WasherStoreException("Impossible to update the washer's status: ");
         }
 
