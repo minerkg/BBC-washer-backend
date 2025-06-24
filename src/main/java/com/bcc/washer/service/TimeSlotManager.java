@@ -3,6 +3,7 @@ package com.bcc.washer.service;
 
 import com.bcc.washer.domain.OPENINGHOURS;
 import com.bcc.washer.domain.ResourceAlreadyExistsException;
+import com.bcc.washer.domain.TimeSlotDuration;
 import com.bcc.washer.domain.time.TimeInterval;
 import com.bcc.washer.domain.time.TimeSlot;
 import com.bcc.washer.repository.TimeSlotRepository;
@@ -46,13 +47,13 @@ public class TimeSlotManager {
         for (LocalDate date = timeSlotStartDayFrom; !date.isAfter(to); date = date.plusDays(1)) {
             for (LocalTime timeIntervalStart = OPENINGHOURS.OPEN.getTime();
                  timeIntervalStart.isBefore(OPENINGHOURS.CLOSE.getTime());
-                 timeIntervalStart = timeIntervalStart.plusHours(1)) {
+                 timeIntervalStart = timeIntervalStart.plusHours(TimeSlotDuration.TWO_HOURS.getDuration())) {
                 TimeSlot newTimeSlot = TimeSlot
                         .builder()
                         .timeInterval(TimeInterval
                                 .builder()
                                 .startTime(timeIntervalStart)
-                                .endTime(timeIntervalStart.plusHours(1))
+                                .endTime(timeIntervalStart.plusHours(TimeSlotDuration.TWO_HOURS.getDuration()))
                                 .date(date)
                                 .build())
                         .bookableUnit(new ArrayList<>())
@@ -74,7 +75,7 @@ public class TimeSlotManager {
     private TimeSlot createFallbackSlot(LocalDate from) {
         return TimeSlot.builder()
                 .timeInterval(TimeInterval.builder()
-                        .startTime(OPENINGHOURS.CLOSE.getTime().minusHours(1))
+                        .startTime(OPENINGHOURS.CLOSE.getTime().minusHours(TimeSlotDuration.TWO_HOURS.getDuration()))
                         .endTime(OPENINGHOURS.CLOSE.getTime())
                         .date(from.minusDays(1))
                         .build())
