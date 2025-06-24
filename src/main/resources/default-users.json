@@ -4,7 +4,7 @@
     "password": "$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO",
     "first_name": "John-client",
     "last_name": "Smith",
-    "email": "csmith@test.com",
+    "email": "bbcwasher+1@gmail.com",
     "phone": "+40741000000",
     "nr_matricol": "12340100",
     "role": "USER"
@@ -14,7 +14,7 @@
     "password": "$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO",
     "first_name": "John-employee",
     "last_name": "Smith",
-    "email": "esmith@test.com",
+    "email": "bbcwasher+2@gmail.com",
     "phone": "+40742000000",
     "nr_matricol": "12340200",
     "role": "USER"
@@ -24,7 +24,7 @@
     "password": "$2a$10$wUVfThvKOFm9U1U0vyvpw.DJneCC3tdImaFk/IOJ3X5cLmr5f1RJO",
     "first_name": "Admin",
     "last_name": "Smith",
-    "email": "asmith@test.com",
+    "email": "bbcwasher+3@gmail.com",
     "phone": "+40743000000",
     "nr_matricol": "12340300",
     "role": "ADMIN"
