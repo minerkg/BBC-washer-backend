@@ -1,9 +1,14 @@
 package com.bcc.washer.service;
 
+import com.bcc.washer.domain.ResourceNotExists;
 import com.bcc.washer.domain.washer.Washer;
 import com.bcc.washer.domain.washer.WasherStatus;
+
 import com.bcc.washer.exceptions.WasherAlreadyExistsException;
 import com.bcc.washer.repository.ReservationRepository;
+
+import com.bcc.washer.exceptions.WasherStoreException;
+
 import com.bcc.washer.repository.WasherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,19 +22,15 @@ public class WasherService {
     @Autowired
     private WasherRepository washerRepository;
 
-
-    //TODO: create washer - new bookable units available
-    //TODO: delete washer - delete relating bookable units
-    //TODO: status update is Available -> effect on bookableUnits
-
     @Autowired
-    private ReservationRepository reservationRepository; // Inject ReservationRepository
+    private BookableUnitService bookableUnitService;
+
 
     public Washer addWasher(Washer washer) {
-        // Set default status to AVAILABLE when a new washer is added
         if (washer.getStatus() == null) {
             washer.setStatus(WasherStatus.AVAILABLE);
         }
+        bookableUnitService.updateBookableUnitsAfterWasherChange(washer, "ADD");
         return washerRepository.save(washer);
     }
 
@@ -49,19 +50,21 @@ public class WasherService {
 
         existingWasher.setName(updatedWasher.getName());
         existingWasher.setCapacity(updatedWasher.getCapacity());
-        existingWasher.setStatus(updatedWasher.getStatus());
 
+        if (!existingWasher.getStatus().equals(updatedWasher.getStatus())) {
+            updateWasherStatus(existingWasher.getId(), updatedWasher.getStatus());
+        }
 
         return washerRepository.save(existingWasher);
     }
 
     public void deleteWasher(Long id) {
-        if (!washerRepository.existsById(id)) {
-            throw new RuntimeException("Washer not found with ID: " + id);
-        }
-        // TODO: Consider handling active reservations for this washer before deletion.
+        Washer washer = washerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotExists("Washer not found with ID: " + id));
+        bookableUnitService.updateBookableUnitsAfterWasherChange(washer, "DELETE");
         washerRepository.deleteById(id);
     }
+
 
     public void verifyDuplicateWasher(Washer washer) {
         Optional<Washer> existing = washerRepository.findByName(washer.getName());
@@ -69,4 +72,20 @@ public class WasherService {
             throw new WasherAlreadyExistsException("Washer with name: " + washer.getName() + " already exists");
         }
     }
+
+
+    public Washer updateWasherStatus(Long id, WasherStatus newStatus) {
+        Washer existingWasher = washerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotExists("Washer not found with ID: " + id));
+        try {
+            existingWasher.setStatus(newStatus);
+            bookableUnitService.updateBookableUnitsAfterWasherChange(existingWasher, "STATUS-UPDATE");
+        } catch (RuntimeException e) {
+            throw new WasherStoreException("Impossible to update the washer's status");
+        }
+
+        return washerRepository.save(existingWasher);
+    }
+
+
 }

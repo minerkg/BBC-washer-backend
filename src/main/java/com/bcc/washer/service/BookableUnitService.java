@@ -2,16 +2,23 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
+
 import com.bcc.washer.domain.time.TimeSlot;
+
+import com.bcc.washer.domain.washer.Washer;
+
 import com.bcc.washer.domain.washer.WasherStatus;
+import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,17 +42,20 @@ public class BookableUnitService {
     @Autowired
     private TimeSlotManager timeSlotManager;
 
+    @Autowired
+    private ReservationService reservationService;
+
+    @Autowired
+    @Qualifier("emailNotificationService")
+    private NotificationServiceI notificationService;
+
 
     // TODO: pageable needed
-    public Set<BookableUnit> getAllAvailableBookableUnits() {
-        return bookableUnitRepository.findAll()
-                .stream()
-                .filter(BookableUnit::isAvailable)
-                .collect(Collectors.toSet());
+    public Set<BookableUnit> getAllBookableUnits() {
+        return new HashSet<>(bookableUnitRepository.findAll());
 
     }
 
-    // TODO: for the next week
     public Set<BookableUnit> getAllAvailableBookableUnitsWithinOneWeek() {
         LocalDate today = LocalDate.now();
         LocalDate oneWeekLater = today.plusDays(7);
@@ -94,6 +104,89 @@ public class BookableUnitService {
                         Collectors.collectingAndThen(Collectors.toList(), List::getFirst)
                 ))
                 .values());
+    }
+
+    public void updateBookableUnitsAfterWasherChange(Washer washer, String payload) {
+        switch (payload) {
+            case "ADD" -> {
+                List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
+                generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBookableUnits);
+                bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
+            }
+            case "DELETE" -> {
+                List<BookableUnit> deletableUnits = new ArrayList<>();
+                List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
+                for (BookableUnit bu : futureUnits) {
+                    if (!bu.isAvailable()) {
+                        boolean rescheduled = tryReschedule(bu);
+                        if (!rescheduled) {
+                            notifyUserOfCancellation(bu);
+                        }
+                    } else {
+                        deletableUnits.add(bu);
+                    }
+                }
+                bookableUnitRepository.deleteAll(deletableUnits);
+            }
+
+            case "STATUS-UPDATE" -> {
+                if (washer.getStatus().equals(WasherStatus.AVAILABLE)) {
+                    List<BookableUnit> newlyAvailableBUs = new ArrayList<>();
+                    generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBUs);
+                    bookableUnitRepository.saveAll(newlyAvailableBUs);
+
+                }
+                if (washer.getStatus().equals(WasherStatus.MAINTENANCE)) {
+                    List<BookableUnit> deletableUnits = new ArrayList<>();
+                    List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
+                    for (BookableUnit bu : futureUnits) {
+                        if (!bu.isAvailable()) {
+                            boolean rescheduled = tryReschedule(bu);
+                            if (!rescheduled) {
+                                notifyUserOfCancellation(bu);
+                            }
+                        } else {
+                            deletableUnits.add(bu);
+                        }
+                    }
+                    bookableUnitRepository.deleteAll(deletableUnits);
+
+                }
+            }
+            default -> throw new WasherStoreException("BookableUnit update error after washer change");
+        }
+
+    }
+
+    private void generateNewBookableUnitsAfterWasherAdd(Washer washer, List<BookableUnit> newlyAvailableBookableUnits) {
+        timeSlotRepository.findAll().stream()
+                .filter(ts -> ts.getTimeInterval().getDate().isAfter(LocalDate.now()))
+                .forEach(ts -> newlyAvailableBookableUnits.add(
+                        BookableUnit.builder()
+                                .isAvailable(true)
+                                .timeSlot(ts)
+                                .washer(washer)
+                                .build()));
+
+    }
+
+
+    private boolean tryReschedule(BookableUnit bu) {
+        return bookableUnitRepository.findAllByDate(bu.getTimeSlot().getTimeInterval().getDate()).stream()
+                .filter(BookableUnit::isAvailable)
+                .findFirst()
+                .map(freeBu -> {
+                    reservationService.makeReservation(freeBu.getId(), bu.getReservation().getUser().getId());
+                    return true;
+                }).orElse(false);
+    }
+
+    private void notifyUserOfCancellation(BookableUnit bu) {
+        notificationService.notifyReservation(
+                bu.getReservation().getUser().getEmail(),
+                "Appointment deleted",
+                "Dear user, due to a technical issue with the washer, your reservation cannot be rescheduled.",
+                bu);
     }
 
 }

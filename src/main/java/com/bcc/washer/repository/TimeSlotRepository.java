@@ -17,4 +17,8 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
 
     @Query("SELECT ts FROM TimeSlot ts WHERE ts.bookableUnit IS EMPTY ")
     List<TimeSlot> findAllWithoutBookableUnits();
+
+    @Query("SELECT ts FROM TimeSlot ts WHERE ts.timeInterval.date = :localDate")
+    List<TimeSlot> findAllByDate(@Param("localDate") LocalDate localDate);
+
 }

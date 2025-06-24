@@ -2,12 +2,11 @@ package com.bcc.washer.service;
 
 import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.TemplateTYPE;
-import com.bcc.washer.domain.reservation.Reservation;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -16,14 +15,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @Qualifier("emailNotificationService")
 @Service
-public class EmailServiceImpl implements NotificationServiceI{
+public class EmailServiceImpl implements NotificationServiceI {
 
     @Autowired
     private JavaMailSender emailSender;
@@ -48,8 +45,7 @@ public class EmailServiceImpl implements NotificationServiceI{
             helper.setText(body, true);
 
             emailSender.send(message);
-        }
-        catch (IOException ioException) {
+        } catch (IOException ioException) {
             ioException.printStackTrace();
         } catch (MessagingException e) {
             throw new RuntimeException(e);

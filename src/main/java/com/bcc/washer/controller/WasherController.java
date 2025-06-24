@@ -3,9 +3,14 @@ package com.bcc.washer.controller;
 
 import com.bcc.washer.domain.TemplateTYPE;
 import com.bcc.washer.domain.washer.Washer;
+
 import com.bcc.washer.exceptions.WasherAlreadyExistsException;
+
 import com.bcc.washer.service.EmailServiceImpl;
 import com.bcc.washer.service.NotificationServiceI;
+
+import com.bcc.washer.domain.washer.WasherStatus;
+
 import com.bcc.washer.service.WasherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,9 +27,6 @@ public class WasherController {
 
     @Autowired
     private WasherService washerService;
-    @Autowired
-    @Qualifier("emailNotificationService")
-    private NotificationServiceI notificationServiceI;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody Washer washer) {
@@ -92,4 +94,19 @@ public class WasherController {
             return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to delete washer", e.getMessage()));
         }
     }
+
+    @PutMapping("/status-update/{id}")
+    public ResponseEntity<ApiResponse<Washer>> updateWasherStatus(
+            @PathVariable Long id,
+            @RequestParam("newStatus") WasherStatus newStatus) {
+        try {
+            Washer updatedWasher = washerService.updateWasherStatus(id, newStatus);
+            return ResponseEntity.ok(new ApiResponse<>("The washer's status successfully updated", updatedWasher));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("error: " +  e.getMessage(), null));
+
+        }
+    }
+
 }
