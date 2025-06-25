@@ -2,6 +2,7 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
+import com.bcc.washer.domain.reservation.ReservationStatus;
 import com.bcc.washer.domain.time.TimeSlot;
 import com.bcc.washer.domain.washer.Washer;
 import com.bcc.washer.domain.washer.WasherStatus;
@@ -139,24 +140,26 @@ public class BookableUnitService {
 
     }
 
-    private void deleteWasherBookableUnitsAndReservations(Washer washer) {
-        List<BookableUnit> deletableUnits = new ArrayList<>();
+    @Transactional
+    protected void deleteWasherBookableUnitsAndReservations(Washer washer) {
+        List<BookableUnit> unAvailableUnits = new ArrayList<>();
         List<BookableUnit> futureUnits = bookableUnitRepository
                 .findAllByWasherAfterNow(washer.getId(), LocalDate.now()
                         .plusDays(1));
         for (BookableUnit bu : futureUnits) {
-            if (!bu.isAvailable()) {
+            if (bu.getReservation() != null) {
                 boolean rescheduled = tryReschedule(bu);
                 if (!rescheduled) {
                     notifyUserOfCancellation(bu);
                 }
-                //delete the reservation anyway
-                reservationService.deleteReservation(bu.getReservation().getId());
-            } else {
-                deletableUnits.add(bu);
+                //cancel the reservation anyway
+                bu.getReservation().setStatus(ReservationStatus.CANCELLED);
             }
+            bu.setAvailable(false);
+            unAvailableUnits.add(bu);
         }
-        bookableUnitRepository.deleteAll(deletableUnits);
+        bookableUnitRepository.saveAll(unAvailableUnits);
+        //bookableUnitRepository.deleteAll(unAvailableUnits);
     }
 
     private void generateNewBookableUnitsAfterWasherAdd(Washer washer, List<BookableUnit> newlyAvailableBookableUnits) {
