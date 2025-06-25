@@ -79,14 +79,14 @@ public class WasherController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteWasher(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<String>> decommissionWasher(@PathVariable Long id) {
         try {
-            washerService.deleteWasher(id);
-            return ResponseEntity.ok(new ApiResponse<>("Washer deleted", "Washer with ID " + id + " has been successfully deleted."));
+            washerService.decommissionWasher(id);
+            return ResponseEntity.ok(new ApiResponse<>("Washer decommissioned", "Washer with ID " + id + " has been successfully decommissioned."));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Washer not found", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to delete washer", e.getMessage()));
+            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to decommission washer", e.getMessage()));
         }
     }
 

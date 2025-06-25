@@ -115,9 +115,9 @@ public class BookableUnitService {
                     bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
                 }
             }
-            case "DELETE" -> {
-                logger.info("updateBookableUnitsAfterWasherChange - delete accessed");
-                deleteWasherBookableUnitsAndReservations(washer);
+            case "DECOMMISSION" -> {
+                logger.info("updateBookableUnitsAfterWasherChange - DECOMMISSION accessed");
+                setUnavailableBookableUnitsAndCancelReservations(washer);
             }
 
             case "STATUS-UPDATE" -> {
@@ -128,7 +128,7 @@ public class BookableUnitService {
                 }
                 try {
                     if (washer.getStatus().equals(WasherStatus.MAINTENANCE)) {
-                        deleteWasherBookableUnitsAndReservations(washer);
+                        setUnavailableBookableUnitsAndCancelReservations(washer);
                     }
                 } catch (Exception e) {
                     logger.error(e.getMessage());
@@ -141,7 +141,7 @@ public class BookableUnitService {
     }
 
     @Transactional
-    protected void deleteWasherBookableUnitsAndReservations(Washer washer) {
+    protected void setUnavailableBookableUnitsAndCancelReservations(Washer washer) {
         List<BookableUnit> unAvailableUnits = new ArrayList<>();
         List<BookableUnit> futureUnits = bookableUnitRepository
                 .findAllByWasherAfterNow(washer.getId(), LocalDate.now()
@@ -159,7 +159,6 @@ public class BookableUnitService {
             unAvailableUnits.add(bu);
         }
         bookableUnitRepository.saveAll(unAvailableUnits);
-        //bookableUnitRepository.deleteAll(unAvailableUnits);
     }
 
     private void generateNewBookableUnitsAfterWasherAdd(Washer washer, List<BookableUnit> newlyAvailableBookableUnits) {

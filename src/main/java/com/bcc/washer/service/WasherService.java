@@ -67,13 +67,13 @@ public class WasherService {
         return existingWasher;
     }
 
-    public void deleteWasher(Long id) {
+    public void decommissionWasher(Long id) {
         Washer washer = washerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotExists("Washer not found with ID: " + id));
-        bookableUnitService.updateBookableUnitsAfterWasherChange(washer, "DELETE");
+        bookableUnitService.updateBookableUnitsAfterWasherChange(washer, "DECOMMISSION");
         washer.setStatus(WasherStatus.DECOMMISSIONED);
         washerRepository.save(washer);
-        //washerRepository.deleteById(id);
+
     }
 
 
