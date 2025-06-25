@@ -108,9 +108,11 @@ public class BookableUnitService {
     public void updateBookableUnitsAfterWasherChange(Washer washer, String payload) {
         switch (payload) {
             case "ADD" -> {
-                List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
-                generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBookableUnits);
-                bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
+                if (washer.getStatus().equals(WasherStatus.AVAILABLE)) {
+                    List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
+                    generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBookableUnits);
+                    bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
+                }
             }
             case "DELETE" -> {
                 logger.info("updateBookableUnitsAfterWasherChange - delete accessed");
