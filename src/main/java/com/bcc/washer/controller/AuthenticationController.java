@@ -57,18 +57,4 @@ public class AuthenticationController {
             return ResponseEntity.ok().body(new ApiResponse<>("user update failed",e.getMessage()));
         }
     }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/update-role")
-    public ResponseEntity<?> updateUserRole(@RequestBody UserRoleUpdateRequest request) {
-        try {
-            userService.updateUserRole(request.getUsername(), request.getNewRole());
-            return ResponseEntity.ok().body(new ApiResponse<>("role changed",null));
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: " + e.getMessage());
-        }
-    }
-
-
-
 }
