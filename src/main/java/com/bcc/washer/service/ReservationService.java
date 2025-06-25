@@ -92,6 +92,7 @@ public class ReservationService {
 
         BookableUnit bookableUnit = reservation.getBookableUnit();
         if (bookableUnit != null) {
+            bookableUnit.setReservation(null);
             bookableUnit.setAvailable(true); // Make the bookable unit available again
             bookableUnitRepository.save(bookableUnit);
         }

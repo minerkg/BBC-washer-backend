@@ -71,7 +71,9 @@ public class WasherService {
         Washer washer = washerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotExists("Washer not found with ID: " + id));
         bookableUnitService.updateBookableUnitsAfterWasherChange(washer, "DELETE");
-        washerRepository.deleteById(id);
+        washer.setStatus(WasherStatus.DECOMMISSIONED);
+        washerRepository.save(washer);
+        //washerRepository.deleteById(id);
     }
 
 
