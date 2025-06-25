@@ -2,6 +2,9 @@ package com.bcc.washer.service.user;
 
 import com.bcc.washer.domain.user.Role;
 import com.bcc.washer.domain.user.User;
+import com.bcc.washer.dto.UpdateUserDto;
+import com.bcc.washer.dto.UserDto;
+import com.bcc.washer.dto.UserDtoConverter;
 import com.bcc.washer.dto.UserRegistrationRequest;
 import com.bcc.washer.exceptions.UserAlreadyExistsException;
 import com.bcc.washer.exceptions.UserNotFoundException;
@@ -24,6 +27,8 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserDtoConverter userDtoConverter;
 
     @Transactional
     public User registerUser(UserRegistrationRequest userRequest) {
@@ -83,5 +88,16 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Transactional
+    public User updateUser(UpdateUserDto updateData) {
+        User user = userRepository.findByUsername(updateData.getUsername()).orElseThrow(()-> new UserNotFoundException("User not found with username: " + updateData.getUsername()));
+        user.setFirst_name(updateData.getFirst_name());
+        user.setLast_name(updateData.getLast_name());
+        user.setEmail(updateData.getEmail());
+        user.setPhone(updateData.getPhone());
+
+        return user;
     }
 }

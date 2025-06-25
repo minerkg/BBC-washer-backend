@@ -65,8 +65,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/public/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/bookable-units").authenticated() // <--- AICI
                         .requestMatchers("/api/v1/user/resource/test").authenticated()
                         .requestMatchers("/api/v1/user/me").authenticated()
