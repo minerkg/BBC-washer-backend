@@ -66,9 +66,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/public/auth/**").permitAll()
+                        .requestMatchers("/public/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/bookable-units").authenticated() // <--- AICI
                         .requestMatchers("/api/v1/user/resource/test").authenticated()
                         .requestMatchers("/api/v1/user/me").authenticated()
+                        .requestMatchers("/api/v1/users").hasAnyRole("ADMIN")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/employee/**").hasRole("EMPLOYEE")
                         .anyRequest().authenticated()
