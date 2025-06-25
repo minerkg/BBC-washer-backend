@@ -1,11 +1,11 @@
 package com.bcc.washer.controller;
 
-import com.bcc.washer.dto.PasswordChangeRequest;
-import com.bcc.washer.dto.UserRoleUpdateRequest;
-import com.bcc.washer.dto.UserRegistrationRequest;
+import com.bcc.washer.domain.user.User;
+import com.bcc.washer.dto.*;
 import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.service.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.sql.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -70,6 +70,16 @@ public class AuthenticationController {
             return ResponseEntity.badRequest().body(new ApiResponse<>("password change failed",e.getMessage()));
         }
 
+    }
+
+    @PutMapping("/update-user")
+    public ResponseEntity<?> updateUserInfo(@RequestBody UpdateUserDto updateData){
+        try {
+            User updatedUser = userService.updateUser(updateData);
+            return ResponseEntity.ok().body(new ApiResponse<>("updated user", updatedUser));
+        }catch (RuntimeException e){
+            return ResponseEntity.ok().body(new ApiResponse<>("user update failed",e.getMessage()));
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")
