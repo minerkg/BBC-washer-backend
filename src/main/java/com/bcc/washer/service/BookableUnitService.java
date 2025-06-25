@@ -117,14 +117,21 @@ public class BookableUnitService {
                 bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
             }
             case "DELETE" -> {
+                logger.info("updateBookableUnitsAfterWasherChange - delete accessed");
                 List<BookableUnit> deletableUnits = new ArrayList<>();
-                List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
+                logger.info(deletableUnits.toString());
+                List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDate.now());
+
+                logger.info(futureUnits.toString());
+
                 for (BookableUnit bu : futureUnits) {
                     if (!bu.isAvailable()) {
                         boolean rescheduled = tryReschedule(bu);
                         if (!rescheduled) {
                             notifyUserOfCancellation(bu);
                         }
+                        //delete the reservation anyway
+                        reservationService.deleteReservation(bu.getReservation().getId());
                     } else {
                         deletableUnits.add(bu);
                     }
@@ -142,7 +149,7 @@ public class BookableUnitService {
                 try {
                     if (washer.getStatus().equals(WasherStatus.MAINTENANCE)) {
                         List<BookableUnit> deletableUnits = new ArrayList<>();
-                        List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
+                        List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDate.now());
                         for (BookableUnit bu : futureUnits) {
                             if (!bu.isAvailable()) {
                                 boolean rescheduled = tryReschedule(bu);
