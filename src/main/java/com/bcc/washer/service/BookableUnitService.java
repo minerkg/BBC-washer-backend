@@ -190,7 +190,7 @@ public class BookableUnitService {
     private void notifyUserOfCancellation(BookableUnit bu) {
         logger.info("notifyUserOfCancellation accessed --- sending cancellation e-mail ");
         CompletableFuture.runAsync(
-                () -> notificationService.notifyReservation(
+                () -> notificationService.notifyCancellation(
                         bu.getReservation().getUser().getEmail(),
                         "Washer reservation cancelled",
                         "We’re sorry to inform you that, due to a technical issue with the washing machine, " +

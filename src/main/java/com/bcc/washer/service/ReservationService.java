@@ -65,8 +65,9 @@ public class ReservationService {
         CompletableFuture.runAsync(
                 () -> notificationServiceI.notifyReservation(
                         user.getEmail(),
-                        "Reservation Created: ",
-                        "Washer has been updated: ",
+                        "Washer reservation created ",
+                        "Each reservation covers a 2-hour time slot. If you require more time, " +
+                                "please book multiple consecutive slots.",
                         bookableUnit));
 
 
