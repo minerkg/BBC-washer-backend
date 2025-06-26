@@ -146,8 +146,7 @@ public class BookableUnitService {
     protected void setUnavailableBookableUnitsAndCancelReservations(Washer washer) {
         List<BookableUnit> unAvailableUnits = new ArrayList<>();
         List<BookableUnit> futureUnits = bookableUnitRepository
-                .findAllByWasherAfterNow(washer.getId(), LocalDate.now()
-                        .plusDays(1));
+                .findAllByWasherAfterNow(washer.getId(), LocalDate.now());
         for (BookableUnit bu : futureUnits) {
             if (bu.getReservation() != null) {
                 logger.info("setUnavailableBookableUnitsAndCancelReservations accessed --- " + bu);
