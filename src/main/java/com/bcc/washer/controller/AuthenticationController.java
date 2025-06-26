@@ -36,30 +36,6 @@ public class AuthenticationController {
         }
     }
 
-//    @PostMapping("/register-batch")
-//    public ResponseEntity<ApiResponse<?>> registerMultipleUsers(@RequestBody List<UserRegistrationRequest> requests) {
-//        List<Object> createdUsers = new ArrayList<>();
-//        List<String> errors = new ArrayList<>();
-//        for (UserRegistrationRequest request : requests) {
-//            try {
-//                var user = userService.registerUser(request);
-//                createdUsers.add(user);
-//            } catch (WasherStoreException e) {
-//                errors.add("Failed to create user '" + request.username() + "': " + e.getMessage());
-//            }
-//        }
-//        ApiResponse<Object> response = new ApiResponse<>(
-//                errors.isEmpty() ? "All users created" : "Some users failed",
-//                Map.of(
-//                        "created", createdUsers,
-//                        "errors", errors
-//                )
-//        );
-//        return ResponseEntity
-//                .status(errors.isEmpty() ? HttpStatus.OK : HttpStatus.MULTI_STATUS)
-//                .body(response);
-//    }
-
     @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest request, Authentication authentication){
         try {
@@ -81,18 +57,4 @@ public class AuthenticationController {
             return ResponseEntity.ok().body(new ApiResponse<>("user update failed",e.getMessage()));
         }
     }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/update-role")
-    public ResponseEntity<?> updateUserRole(@RequestBody UserRoleUpdateRequest request) {
-        try {
-            userService.updateUserRole(request.getUsername(), request.getNewRole());
-            return ResponseEntity.ok().body(new ApiResponse<>("role changed",null));
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: " + e.getMessage());
-        }
-    }
-
-
-
 }
