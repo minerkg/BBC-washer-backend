@@ -2,6 +2,7 @@ package com.bcc.washer.repository;
 
 import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.washer.Washer;
+import org.springframework.beans.PropertyValues;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +30,7 @@ public interface BookableUnitRepository extends JpaRepository<BookableUnit, Long
     @EntityGraph(value = "BookableUnit.withAllData")
     List<BookableUnit> findAllByWasherAfterNow(@Param("washerId") Long washerId, @Param("now") LocalDate now);
 
+    @Query("select b from BookableUnit b where b.timeSlot.id = :timeSlotId")
+    @EntityGraph(value = "BookableUnit.withAllData")
+    List<BookableUnit> findAllByTimeSlotId(Long timeSlotId);
 }
