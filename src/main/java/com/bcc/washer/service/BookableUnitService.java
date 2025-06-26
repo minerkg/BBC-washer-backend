@@ -109,7 +109,9 @@ public class BookableUnitService {
     public void updateBookableUnitsAfterWasherChange(Washer washer, String payload) {
         switch (payload) {
             case "ADD" -> {
+                logger.info("updateBookableUnitsAfterWasherChange - ADD accessed");
                 if (washer.getStatus().equals(WasherStatus.AVAILABLE)) {
+                    logger.info("updateBookableUnitsAfterWasherChange - ADD - if washer available accessed");
                     List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
                     generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBookableUnits);
                     bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
@@ -140,7 +142,7 @@ public class BookableUnitService {
 
     }
 
-    @Transactional
+    //@Transactional
     protected void setUnavailableBookableUnitsAndCancelReservations(Washer washer) {
         List<BookableUnit> unAvailableUnits = new ArrayList<>();
         List<BookableUnit> futureUnits = bookableUnitRepository
@@ -148,6 +150,7 @@ public class BookableUnitService {
                         .plusDays(1));
         for (BookableUnit bu : futureUnits) {
             if (bu.getReservation() != null) {
+                logger.info("setUnavailableBookableUnitsAndCancelReservations accessed --- " + bu);
                 boolean rescheduled = tryReschedule(bu);
                 if (!rescheduled) {
                     notifyUserOfCancellation(bu);
@@ -175,7 +178,7 @@ public class BookableUnitService {
 
 
     private boolean tryReschedule(BookableUnit bu) {
-        return bookableUnitRepository.findAllByDate(bu.getTimeSlot().getTimeInterval().getDate()).stream()
+        return bookableUnitRepository.findAllByTimeSlotId(bu.getTimeSlot().getId()).stream()
                 .filter(BookableUnit::isAvailable)
                 .findFirst()
                 .map(freeBu -> {
@@ -185,6 +188,7 @@ public class BookableUnitService {
     }
 
     private void notifyUserOfCancellation(BookableUnit bu) {
+        logger.info("notifyUserOfCancellation accessed --- sending cancellation e-mail ");
         notificationService.notifyReservation(
                 bu.getReservation().getUser().getEmail(),
                 "Appointment deleted",
