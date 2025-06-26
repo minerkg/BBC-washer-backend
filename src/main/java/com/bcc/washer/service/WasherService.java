@@ -3,13 +3,13 @@ package com.bcc.washer.service;
 import com.bcc.washer.domain.ResourceNotExists;
 import com.bcc.washer.domain.washer.Washer;
 import com.bcc.washer.domain.washer.WasherStatus;
-
+import com.bcc.washer.dto.WasherRequest;
 import com.bcc.washer.exceptions.WasherAlreadyExistsException;
-import com.bcc.washer.repository.ReservationRepository;
-
 import com.bcc.washer.exceptions.WasherStoreException;
-
 import com.bcc.washer.repository.WasherRepository;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +25,21 @@ public class WasherService {
     @Autowired
     private BookableUnitService bookableUnitService;
 
+    private Logger logger = LoggerFactory.getLogger(WasherService.class);
 
-    public Washer addWasher(Washer washer) {
+
+    public Washer addWasher(WasherRequest washer) {
         if (washer.getStatus() == null) {
             washer.setStatus(WasherStatus.AVAILABLE);
         }
-        bookableUnitService.updateBookableUnitsAfterWasherChange(washer, "ADD");
-        return washerRepository.save(washer);
+        var savedWasher = washerRepository.save(
+                Washer.builder()
+                        .name(washer.getName())
+                        .status(washer.getStatus())
+                        .capacity(washer.getCapacity())
+                        .build());
+        bookableUnitService.updateBookableUnitsAfterWasherChange(savedWasher, "ADD");
+        return savedWasher;
     }
 
 
@@ -44,6 +52,7 @@ public class WasherService {
                 .orElseThrow(() -> new RuntimeException("Washer not found with ID: " + id));
     }
 
+    @Transactional
     public Washer updateWasher(Long id, Washer updatedWasher) {
         Washer existingWasher = washerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Washer not found with ID: " + id));
@@ -55,25 +64,27 @@ public class WasherService {
             updateWasherStatus(existingWasher.getId(), updatedWasher.getStatus());
         }
 
-        return washerRepository.save(existingWasher);
+        return existingWasher;
     }
 
-    public void deleteWasher(Long id) {
+    public void decommissionWasher(Long id) {
         Washer washer = washerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotExists("Washer not found with ID: " + id));
-        bookableUnitService.updateBookableUnitsAfterWasherChange(washer, "DELETE");
-        washerRepository.deleteById(id);
+        bookableUnitService.updateBookableUnitsAfterWasherChange(washer, "DECOMMISSION");
+        washer.setStatus(WasherStatus.DECOMMISSIONED);
+        washerRepository.save(washer);
+
     }
 
 
-    public void verifyDuplicateWasher(Washer washer) {
+    public void verifyDuplicateWasher(WasherRequest washer) {
         Optional<Washer> existing = washerRepository.findByName(washer.getName());
         if (existing.isPresent()) {
             throw new WasherAlreadyExistsException("Washer with name: " + washer.getName() + " already exists");
         }
     }
 
-
+    @Transactional
     public Washer updateWasherStatus(Long id, WasherStatus newStatus) {
         Washer existingWasher = washerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotExists("Washer not found with ID: " + id));
@@ -81,10 +92,11 @@ public class WasherService {
             existingWasher.setStatus(newStatus);
             bookableUnitService.updateBookableUnitsAfterWasherChange(existingWasher, "STATUS-UPDATE");
         } catch (RuntimeException e) {
-            throw new WasherStoreException("Impossible to update the washer's status");
+            logger.error(e.getMessage());
+            throw new WasherStoreException("Impossible to update the washer's status: ");
         }
 
-        return washerRepository.save(existingWasher);
+        return existingWasher;
     }
 
 

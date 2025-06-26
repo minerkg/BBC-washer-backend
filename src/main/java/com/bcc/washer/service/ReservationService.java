@@ -50,13 +50,17 @@ public class ReservationService {
 
         // Mark the bookable unit as unavailable
         bookableUnit.setAvailable(false);
-        bookableUnitRepository.save(bookableUnit); // Save the updated bookable unit
 
         Reservation newReservation = Reservation.builder()
                 .user(user)
                 .bookableUnit(bookableUnit)
                 .status(ReservationStatus.CONFIRMED) // Set initial status
                 .build();
+
+        bookableUnit.setReservation(newReservation);
+        bookableUnitRepository.save(bookableUnit); // Save the updated bookable unit
+
+
         // TODO : Change for user.email !
 //        CompletableFuture.runAsync(() -> notificationServiceI.notifyReservation(user.getEmail(),"Reservation Created: ","Washer has been updated: ",bookableUnit));
 
@@ -88,6 +92,7 @@ public class ReservationService {
 
         BookableUnit bookableUnit = reservation.getBookableUnit();
         if (bookableUnit != null) {
+            bookableUnit.setReservation(null);
             bookableUnit.setAvailable(true); // Make the bookable unit available again
             bookableUnitRepository.save(bookableUnit);
         }
@@ -98,5 +103,11 @@ public class ReservationService {
     // New method for admin to view all reservations
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
+    }
+
+    public void deleteReservation(Long reservationId) {
+        reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
+        reservationRepository.deleteById(reservationId);
     }
 }

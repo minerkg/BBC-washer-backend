@@ -4,7 +4,7 @@ import com.bcc.washer.controller.TimeSlotController;
 import com.bcc.washer.domain.ResourceAlreadyExistsException;
 import com.bcc.washer.domain.user.User;
 import com.bcc.washer.domain.washer.Washer;
-import com.bcc.washer.repository.BookableUnitRepository;
+import com.bcc.washer.dto.WasherRequest;
 import com.bcc.washer.repository.UserRepository;
 import com.bcc.washer.repository.WasherRepository;
 import com.bcc.washer.service.BookableUnitService;
@@ -39,14 +39,13 @@ public class DataInitializer implements ApplicationRunner {
     private final WasherRepository washerRepository;
     private final WasherService washerService;
 
-    private final BookableUnitService bookableUnitService;
 
     @Override
     public void run(ApplicationArguments args) {
         initUsers();
         initTimeSlots();
         initWashers();
-        initBookableUnits();
+
     }
 
     public void initUsers() {
@@ -94,9 +93,9 @@ public class DataInitializer implements ApplicationRunner {
             ObjectMapper mapper = new ObjectMapper();
             InputStream inputStream = new ClassPathResource("default-washers.json").getInputStream();
 
-            Washer[] washers = mapper.readValue(inputStream, Washer[].class);
+            WasherRequest[] washers = mapper.readValue(inputStream, WasherRequest[].class);
 
-            for (Washer washer : washers) {
+            for (WasherRequest washer : washers) {
                 try {
                     Optional<Washer> existing = washerRepository.findByName(washer.getName());
                     if (existing.isPresent()) {
@@ -119,14 +118,6 @@ public class DataInitializer implements ApplicationRunner {
         }
     }
 
-    private void initBookableUnits() {
-        try {
-            bookableUnitService.generateBookableUnits();
-            logger.info("Bookable units initialized");
-        } catch (Exception e) {
-            logger.error("Failed to initialize bookable units", e);
-        }
-    }
 
 
 }

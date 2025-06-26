@@ -2,23 +2,22 @@ package com.bcc.washer.service;
 
 
 import com.bcc.washer.domain.BookableUnit;
-
+import com.bcc.washer.domain.reservation.ReservationStatus;
 import com.bcc.washer.domain.time.TimeSlot;
-
 import com.bcc.washer.domain.washer.Washer;
-
 import com.bcc.washer.domain.washer.WasherStatus;
 import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.TimeSlotRepository;
 import com.bcc.washer.repository.WasherRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +48,7 @@ public class BookableUnitService {
     @Qualifier("emailNotificationService")
     private NotificationServiceI notificationService;
 
+    private Logger logger = LoggerFactory.getLogger(BookableUnitService.class);
 
     // TODO: pageable needed
     public Set<BookableUnit> getAllBookableUnits() {
@@ -73,20 +73,20 @@ public class BookableUnitService {
         List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
 
         timeSlotRepository.findAllWithoutBookableUnits()
-                .forEach(timeSlot ->{
-                        TimeSlot attachedTimeSlot = timeSlotRepository.findById(timeSlot.getId())
-                        .orElseThrow(() -> new IllegalStateException("TimeSlot with ID " + timeSlot.getId() + " not found"));
+                .forEach(timeSlot -> {
+                    TimeSlot attachedTimeSlot = timeSlotRepository.findById(timeSlot.getId())
+                            .orElseThrow(() -> new IllegalStateException("TimeSlot with ID " + timeSlot.getId() + " not found"));
 
-                        washerRepository.findAll().stream().filter(washer -> washer.getStatus().equals(WasherStatus.AVAILABLE))
-                                .forEach(washer -> newlyAvailableBookableUnits.add(
-                                        BookableUnit.builder()
-                                                .isAvailable(true)
-                                                .timeSlot(attachedTimeSlot)
-                                                .washer(washer)
-                                                .build())
-                                );
+                    washerRepository.findAll().stream().filter(washer -> washer.getStatus().equals(WasherStatus.AVAILABLE))
+                            .forEach(washer -> newlyAvailableBookableUnits.add(
+                                    BookableUnit.builder()
+                                            .isAvailable(true)
+                                            .timeSlot(attachedTimeSlot)
+                                            .washer(washer)
+                                            .build())
+                            );
 
-    });
+                });
         bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
 
     }
@@ -109,24 +109,15 @@ public class BookableUnitService {
     public void updateBookableUnitsAfterWasherChange(Washer washer, String payload) {
         switch (payload) {
             case "ADD" -> {
-                List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
-                generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBookableUnits);
-                bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
-            }
-            case "DELETE" -> {
-                List<BookableUnit> deletableUnits = new ArrayList<>();
-                List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
-                for (BookableUnit bu : futureUnits) {
-                    if (!bu.isAvailable()) {
-                        boolean rescheduled = tryReschedule(bu);
-                        if (!rescheduled) {
-                            notifyUserOfCancellation(bu);
-                        }
-                    } else {
-                        deletableUnits.add(bu);
-                    }
+                if (washer.getStatus().equals(WasherStatus.AVAILABLE)) {
+                    List<BookableUnit> newlyAvailableBookableUnits = new ArrayList<>();
+                    generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBookableUnits);
+                    bookableUnitRepository.saveAll(newlyAvailableBookableUnits);
                 }
-                bookableUnitRepository.deleteAll(deletableUnits);
+            }
+            case "DECOMMISSION" -> {
+                logger.info("updateBookableUnitsAfterWasherChange - DECOMMISSION accessed");
+                setUnavailableBookableUnitsAndCancelReservations(washer);
             }
 
             case "STATUS-UPDATE" -> {
@@ -134,28 +125,40 @@ public class BookableUnitService {
                     List<BookableUnit> newlyAvailableBUs = new ArrayList<>();
                     generateNewBookableUnitsAfterWasherAdd(washer, newlyAvailableBUs);
                     bookableUnitRepository.saveAll(newlyAvailableBUs);
-
                 }
-                if (washer.getStatus().equals(WasherStatus.MAINTENANCE)) {
-                    List<BookableUnit> deletableUnits = new ArrayList<>();
-                    List<BookableUnit> futureUnits = bookableUnitRepository.findAllByWasherAfterNow(washer.getId(), LocalDateTime.now());
-                    for (BookableUnit bu : futureUnits) {
-                        if (!bu.isAvailable()) {
-                            boolean rescheduled = tryReschedule(bu);
-                            if (!rescheduled) {
-                                notifyUserOfCancellation(bu);
-                            }
-                        } else {
-                            deletableUnits.add(bu);
-                        }
+                try {
+                    if (washer.getStatus().equals(WasherStatus.MAINTENANCE)) {
+                        setUnavailableBookableUnitsAndCancelReservations(washer);
                     }
-                    bookableUnitRepository.deleteAll(deletableUnits);
-
+                } catch (Exception e) {
+                    logger.error(e.getMessage());
+                    throw new WasherStoreException(e.getMessage());
                 }
             }
             default -> throw new WasherStoreException("BookableUnit update error after washer change");
         }
 
+    }
+
+    @Transactional
+    protected void setUnavailableBookableUnitsAndCancelReservations(Washer washer) {
+        List<BookableUnit> unAvailableUnits = new ArrayList<>();
+        List<BookableUnit> futureUnits = bookableUnitRepository
+                .findAllByWasherAfterNow(washer.getId(), LocalDate.now()
+                        .plusDays(1));
+        for (BookableUnit bu : futureUnits) {
+            if (bu.getReservation() != null) {
+                boolean rescheduled = tryReschedule(bu);
+                if (!rescheduled) {
+                    notifyUserOfCancellation(bu);
+                }
+                //cancel the reservation anyway
+                bu.getReservation().setStatus(ReservationStatus.CANCELLED);
+            }
+            bu.setAvailable(false);
+            unAvailableUnits.add(bu);
+        }
+        bookableUnitRepository.saveAll(unAvailableUnits);
     }
 
     private void generateNewBookableUnitsAfterWasherAdd(Washer washer, List<BookableUnit> newlyAvailableBookableUnits) {
