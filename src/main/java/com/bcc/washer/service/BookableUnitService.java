@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -188,11 +189,16 @@ public class BookableUnitService {
 
     private void notifyUserOfCancellation(BookableUnit bu) {
         logger.info("notifyUserOfCancellation accessed --- sending cancellation e-mail ");
-        notificationService.notifyReservation(
-                bu.getReservation().getUser().getEmail(),
-                "Appointment deleted",
-                "Dear user, due to a technical issue with the washer, your reservation cannot be rescheduled.",
-                bu);
+        CompletableFuture.runAsync(
+                () -> notificationService.notifyReservation(
+                        bu.getReservation().getUser().getEmail(),
+                        "Washer reservation cancelled",
+                        "We’re sorry to inform you that, due to a technical issue with the washing machine, " +
+                                "your reservation cannot be rescheduled for the same day and starting time. " +
+                                "We apologize for the inconvenience and appreciate your understanding. " +
+                                "Please feel free to choose a new time that works for you.</p>",
+                        bu)
+        );
     }
 
 }

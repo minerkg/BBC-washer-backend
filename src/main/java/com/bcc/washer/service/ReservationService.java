@@ -3,7 +3,11 @@ package com.bcc.washer.service;
 
 import com.bcc.washer.domain.BookableUnit;
 import com.bcc.washer.domain.reservation.Reservation;
-import com.bcc.washer.domain.reservation.ReservationStatus; // Import the new enum
+import com.bcc.washer.domain.reservation.ReservationStatus;
+import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
+import com.bcc.washer.exceptions.ReservationNotFoundException;
+import com.bcc.washer.exceptions.UserNotFoundException;
+import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.ReservationRepository;
 import com.bcc.washer.repository.UserRepository;
@@ -11,14 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List; // Changed from Set to List for findAll (can be Set too, just consistency)
+
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import com.bcc.washer.exceptions.WasherStoreException;
-import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
-import com.bcc.washer.exceptions.UserNotFoundException;
-import com.bcc.washer.exceptions.ReservationNotFoundException;
 
 @Service
 public class ReservationService {
@@ -61,10 +62,13 @@ public class ReservationService {
         bookableUnitRepository.save(bookableUnit); // Save the updated bookable unit
 
 
-        // TODO : Change for user.email !
-//        CompletableFuture.runAsync(() -> notificationServiceI.notifyReservation(user.getEmail(),"Reservation Created: ","Washer has been updated: ",bookableUnit));
+        CompletableFuture.runAsync(
+                () -> notificationServiceI.notifyReservation(
+                        user.getEmail(),
+                        "Reservation Created: ",
+                        "Washer has been updated: ",
+                        bookableUnit));
 
-        CompletableFuture.runAsync(() -> notificationServiceI.notifyReservation("zblaziu@gmail.com","Reservation Created: "," ",bookableUnit));
 
         return reservationRepository.save(newReservation);
     }
