@@ -78,7 +78,6 @@ public class ReservationService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
-        // Filter for CONFIRMED bookings for the user, or all if you want history including cancelled
         return reservationRepository.findAll().stream()
                 .filter(reservation -> reservation.getUser().getId() == userId)
                 .collect(Collectors.toSet());
