@@ -1,17 +1,15 @@
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.TemplateTYPE;
 import com.bcc.washer.domain.reservation.Reservation;
+import com.bcc.washer.domain.reservation.ReservationStatus;
 import com.bcc.washer.dto.ReservationDto;
 import com.bcc.washer.dto.ReservationDtoConverter;
 import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
 import com.bcc.washer.exceptions.ReservationNotFoundException;
 import com.bcc.washer.exceptions.UserNotFoundException;
 import com.bcc.washer.exceptions.WasherStoreException;
-import com.bcc.washer.service.NotificationServiceI;
 import com.bcc.washer.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/reservation")
@@ -30,7 +27,6 @@ public class ReservationController {
 
     @Autowired
     private ReservationDtoConverter reservationDtoConverter;
-
 
 
     @GetMapping("/{userId}")
@@ -93,6 +89,22 @@ public class ReservationController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(new ApiResponse<>("Failed to retrieve all reservations", null));
+        }
+    }
+
+    @PutMapping("/{reservationId}")
+    public ResponseEntity<ApiResponse<String>> changeReservationStatus(
+            @PathVariable Long reservationId,
+            @RequestParam ReservationStatus reservationStatus) {
+        try {
+            reservationService.changeReservationStatus(reservationId, reservationStatus);
+            return ResponseEntity.ok(new ApiResponse<>("Reservation status change", "Status of the reservation with ID " + reservationId + " has been successfully modified."));
+        } catch (ReservationNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Status change failed", e.getMessage()));
+        } catch (WasherStoreException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("Status change failed", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponse<>("Internal server error", e.getMessage()));
         }
     }
 

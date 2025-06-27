@@ -111,7 +111,7 @@ public class ReservationService {
         reservationRepository.save(reservation); // Save the updated reservation instead of deleting
     }
 
-    // New method for admin to view all reservations
+
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
     }
@@ -120,5 +120,19 @@ public class ReservationService {
         reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
         reservationRepository.deleteById(reservationId);
+    }
+
+    public void changeReservationStatus(Long reservationId, ReservationStatus reservationStatus) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new WasherStoreException("Reservation with ID: " + reservationId + " is cancelled. " +
+                    "You cannot modify status of a cancelled reservation.");
+        }
+        if (reservation.getStatus() != reservationStatus) {
+            reservation.setStatus(reservationStatus);
+            reservationRepository.save(reservation);
+        }
+
     }
 }
