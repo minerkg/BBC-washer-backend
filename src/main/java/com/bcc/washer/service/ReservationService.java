@@ -107,10 +107,8 @@ public class ReservationService {
                     .timeSlot(bookableUnit.getTimeSlot())
                     .build();
             bookableUnitRepository.save(newlyAvailableBu);
-//            bookableUnit.setReservation(null);
-//            bookableUnitRepository.save(bookableUnit);
         }
-        //reservation.setBookableUnit(null);
+
         reservation.setStatus(ReservationStatus.CANCELLED); // Set status to CANCELLED
         reservationRepository.save(reservation); // Save the updated reservation instead of deleting
     }
