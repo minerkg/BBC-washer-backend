@@ -97,11 +97,20 @@ public class ReservationService {
 
         BookableUnit bookableUnit = reservation.getBookableUnit();
         if (bookableUnit != null) {
-            bookableUnit.setReservation(null);
-            bookableUnit.setAvailable(true); // Make the bookable unit available again
+            bookableUnit.setAvailable(false);
             bookableUnitRepository.save(bookableUnit);
+            //make a new bookable unit with the same timeslot id
+            var newlyAvailableBu = BookableUnit
+                    .builder()
+                    .washer(bookableUnit.getWasher())
+                    .isAvailable(true)
+                    .timeSlot(bookableUnit.getTimeSlot())
+                    .build();
+            bookableUnitRepository.save(newlyAvailableBu);
+//            bookableUnit.setReservation(null);
+//            bookableUnitRepository.save(bookableUnit);
         }
-        reservation.setBookableUnit(null);
+        //reservation.setBookableUnit(null);
         reservation.setStatus(ReservationStatus.CANCELLED); // Set status to CANCELLED
         reservationRepository.save(reservation); // Save the updated reservation instead of deleting
     }
