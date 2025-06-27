@@ -81,7 +81,6 @@ public class ReservationService {
         // Filter for CONFIRMED bookings for the user, or all if you want history including cancelled
         return reservationRepository.findAll().stream()
                 .filter(reservation -> reservation.getUser().getId() == userId)
-                .filter(reservation -> reservation.getStatus() != ReservationStatus.CANCELLED) // Only show non-cancelled for user
                 .collect(Collectors.toSet());
     }
 
