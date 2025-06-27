@@ -101,6 +101,7 @@ public class ReservationService {
             bookableUnit.setAvailable(true); // Make the bookable unit available again
             bookableUnitRepository.save(bookableUnit);
         }
+        reservation.setBookableUnit(null);
         reservation.setStatus(ReservationStatus.CANCELLED); // Set status to CANCELLED
         reservationRepository.save(reservation); // Save the updated reservation instead of deleting
     }
