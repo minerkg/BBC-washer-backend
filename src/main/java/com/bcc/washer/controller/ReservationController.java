@@ -1,18 +1,21 @@
-// src/main/java/com/bcc/washer/controller/ReservationController.java
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.Reservation;
+import com.bcc.washer.domain.reservation.Reservation;
+import com.bcc.washer.domain.reservation.ReservationStatus;
+import com.bcc.washer.dto.ReservationDto;
+import com.bcc.washer.dto.ReservationDtoConverter;
 import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
 import com.bcc.washer.exceptions.ReservationNotFoundException;
 import com.bcc.washer.exceptions.UserNotFoundException;
-import com.bcc.washer.exceptions.WasherStoreException; // Import if not already
+import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List; // Changed from Set to List for findAllReservations
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -22,10 +25,19 @@ public class ReservationController {
     @Autowired
     private ReservationService reservationService;
 
+    @Autowired
+    private ReservationDtoConverter reservationDtoConverter;
+
+
     @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<Set<Reservation>>> getAllReservationByUser(@PathVariable("userId") Long userId) {
+    public ResponseEntity<ApiResponse<Set<ReservationDto>>> getAllReservationByUser(@PathVariable("userId") Long userId) {
         try {
-            return ResponseEntity.ok(new ApiResponse<>("All active reservations of the client", reservationService.findAllByUser(userId)));
+            var reservations = reservationService.findAllByUser(userId);
+            var reservationDtoList = reservationDtoConverter.convertModelListToDtoList(reservations.stream().toList());
+            return ResponseEntity.ok(
+                    new ApiResponse<>(
+                            "All active reservations of the client",
+                            new HashSet<>(reservationDtoList)));
         } catch (UserNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("User not found", null));
         } catch (Exception e) {
@@ -34,16 +46,22 @@ public class ReservationController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ApiResponse<Reservation>> makeReservation(@RequestParam Long bookableUnitId, @RequestParam Long userId) {
+    public ResponseEntity<ApiResponse<ReservationDto>> makeReservation(@RequestParam Long bookableUnitId, @RequestParam Long userId) {
         try {
             Reservation newReservation = reservationService.makeReservation(bookableUnitId, userId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("Appointment booked successfully", newReservation));
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>("Appointment booked successfully",
+                            reservationDtoConverter.convertModelToDto(newReservation)));
         } catch (BookableUnitNotAvailableException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("Booking conflict", null));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>("Booking conflict", null));
         } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("User not found", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>("User not found", null));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Internal server error", null));
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>("Internal server error", null));
         }
     }
 
@@ -56,20 +74,39 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Cancellation failed", e.getMessage()));
         } catch (WasherStoreException e) { // Catch the new exception for already cancelled
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("Cancellation failed", e.getMessage()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new ApiResponse<>("Internal server error", e.getMessage()));
         }
     }
 
-    // New endpoint for ADMIN to view all reservations
+
     @GetMapping("/admin/all")
-    public ResponseEntity<ApiResponse<List<Reservation>>> getAllReservationsForAdmin() {
+    public ResponseEntity<ApiResponse<List<ReservationDto>>> getAllReservationsForAdmin() {
         try {
             List<Reservation> allReservations = reservationService.findAllReservations();
-            return ResponseEntity.ok(new ApiResponse<>("All reservations retrieved", allReservations));
+            var reservationDtoList = reservationDtoConverter.convertModelListToDtoList(allReservations);
+            return ResponseEntity.ok(new ApiResponse<>("All reservations retrieved", reservationDtoList));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to retrieve all reservations", null));
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>("Failed to retrieve all reservations", null));
         }
     }
+
+    @PutMapping("/{reservationId}")
+    public ResponseEntity<ApiResponse<String>> changeReservationStatus(
+            @PathVariable Long reservationId,
+            @RequestParam ReservationStatus reservationStatus) {
+        try {
+            reservationService.changeReservationStatus(reservationId, reservationStatus);
+            return ResponseEntity.ok(new ApiResponse<>("Reservation status change", "Status of the reservation with ID " + reservationId + " has been successfully modified."));
+        } catch (ReservationNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Status change failed", e.getMessage()));
+        } catch (WasherStoreException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("Status change failed", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponse<>("Internal server error", e.getMessage()));
+        }
+    }
+
+
 }

@@ -1,13 +1,21 @@
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.User;
-import com.bcc.washer.dto.UserRegistrationRequest;
+import com.bcc.washer.domain.user.User;
+import com.bcc.washer.dto.*;
 import com.bcc.washer.exceptions.WasherStoreException;
-import com.bcc.washer.service.UserService;
+import com.bcc.washer.service.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.sql.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController()
 @RequestMapping("/public/auth")
@@ -27,16 +35,26 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("user already exists",e.getMessage()));
         }
     }
-//       TEST USER
-//    {
-//        "username": "user2",
-//            "password": "password",
-//            "first_name": "user2 firstn",
-//            "last_name": "user2 lastn",
-//            "email": "user2@example.com",
-//            "phone_nr": "+1230987654"
-//    }
 
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest request, Authentication authentication){
+        try {
+            System.out.println(request);
+            userService.changePassword(authentication.getName(), request.getCurrentPassword(),request.getNewPassword());
+            return ResponseEntity.ok().body(new ApiResponse<>("password changed",null));
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new ApiResponse<>("password change failed",e.getMessage()));
+        }
 
+    }
 
+    @PutMapping("/update-user")
+    public ResponseEntity<?> updateUserInfo(@RequestBody UpdateUserDto updateData){
+        try {
+            User updatedUser = userService.updateUser(updateData);
+            return ResponseEntity.ok().body(new ApiResponse<>("updated user", updatedUser));
+        }catch (RuntimeException e){
+            return ResponseEntity.ok().body(new ApiResponse<>("user update failed",e.getMessage()));
+        }
+    }
 }

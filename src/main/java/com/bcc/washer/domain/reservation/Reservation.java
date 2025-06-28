@@ -1,6 +1,8 @@
 // src/main/java/com/bcc/washer/domain/Reservation.java
-package com.bcc.washer.domain;
+package com.bcc.washer.domain.reservation;
 
+import com.bcc.washer.domain.BookableUnit;
+import com.bcc.washer.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,10 +43,10 @@ public class Reservation {
     @ManyToOne()
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BookableUnit bookableUnit;
 
     @Enumerated(EnumType.STRING) // Store enum as String in DB
-    @Column(nullable = false)
+    @Column(nullable = true)
     private ReservationStatus status; // New field for reservation status
 }

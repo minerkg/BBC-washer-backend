@@ -1,4 +1,4 @@
-package com.bcc.washer.domain;
+package com.bcc.washer.domain.user;
 
 public enum Role {
     ADMIN,

@@ -2,21 +2,24 @@
 package com.bcc.washer.service;
 
 import com.bcc.washer.domain.BookableUnit;
-import com.bcc.washer.domain.Reservation;
-import com.bcc.washer.domain.ReservationStatus; // Import the new enum
+import com.bcc.washer.domain.reservation.Reservation;
+import com.bcc.washer.domain.reservation.ReservationStatus;
+import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
+import com.bcc.washer.exceptions.ReservationNotFoundException;
+import com.bcc.washer.exceptions.UserNotFoundException;
+import com.bcc.washer.exceptions.WasherStoreException;
 import com.bcc.washer.repository.BookableUnitRepository;
 import com.bcc.washer.repository.ReservationRepository;
 import com.bcc.washer.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List; // Changed from Set to List for findAll (can be Set too, just consistency)
+
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import com.bcc.washer.exceptions.WasherStoreException;
-import com.bcc.washer.exceptions.BookableUnitNotAvailableException;
-import com.bcc.washer.exceptions.UserNotFoundException;
-import com.bcc.washer.exceptions.ReservationNotFoundException;
 
 @Service
 public class ReservationService {
@@ -29,6 +32,10 @@ public class ReservationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    @Qualifier("emailNotificationService")
+    private NotificationServiceI notificationServiceI;
 
     @Transactional
     public Reservation makeReservation(Long bookableUnitId, Long userId) {
@@ -44,13 +51,25 @@ public class ReservationService {
 
         // Mark the bookable unit as unavailable
         bookableUnit.setAvailable(false);
-        bookableUnitRepository.save(bookableUnit); // Save the updated bookable unit
 
         Reservation newReservation = Reservation.builder()
                 .user(user)
                 .bookableUnit(bookableUnit)
                 .status(ReservationStatus.CONFIRMED) // Set initial status
                 .build();
+
+        bookableUnit.setReservation(newReservation);
+        bookableUnitRepository.save(bookableUnit); // Save the updated bookable unit
+
+
+        CompletableFuture.runAsync(
+                () -> notificationServiceI.notifyReservation(
+                        user.getEmail(),
+                        "Washer reservation created ",
+                        "Each reservation covers a 2-hour time slot. If you require more time, " +
+                                "please book multiple consecutive slots.",
+                        bookableUnit));
+
 
         return reservationRepository.save(newReservation);
     }
@@ -59,10 +78,8 @@ public class ReservationService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
-        // Filter for CONFIRMED bookings for the user, or all if you want history including cancelled
         return reservationRepository.findAll().stream()
                 .filter(reservation -> reservation.getUser().getId() == userId)
-                .filter(reservation -> reservation.getStatus() != ReservationStatus.CANCELLED) // Only show non-cancelled for user
                 .collect(Collectors.toSet());
     }
 
@@ -78,15 +95,44 @@ public class ReservationService {
 
         BookableUnit bookableUnit = reservation.getBookableUnit();
         if (bookableUnit != null) {
-            bookableUnit.setAvailable(true); // Make the bookable unit available again
+            bookableUnit.setAvailable(false);
             bookableUnitRepository.save(bookableUnit);
+            //make a new bookable unit with the same timeslot id
+            var newlyAvailableBu = BookableUnit
+                    .builder()
+                    .washer(bookableUnit.getWasher())
+                    .isAvailable(true)
+                    .timeSlot(bookableUnit.getTimeSlot())
+                    .build();
+            bookableUnitRepository.save(newlyAvailableBu);
         }
+
         reservation.setStatus(ReservationStatus.CANCELLED); // Set status to CANCELLED
         reservationRepository.save(reservation); // Save the updated reservation instead of deleting
     }
 
-    // New method for admin to view all reservations
+
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
+    }
+
+    public void deleteReservation(Long reservationId) {
+        reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
+        reservationRepository.deleteById(reservationId);
+    }
+
+    public void changeReservationStatus(Long reservationId, ReservationStatus reservationStatus) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new WasherStoreException("Reservation with ID: " + reservationId + " is cancelled. " +
+                    "You cannot modify status of a cancelled reservation.");
+        }
+        if (reservation.getStatus() != reservationStatus) {
+            reservation.setStatus(reservationStatus);
+            reservationRepository.save(reservation);
+        }
+
     }
 }

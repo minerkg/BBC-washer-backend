@@ -25,11 +25,12 @@ repositories {
 }
 
 dependencies {
+
 	dependencies {
 		// --- Web & Application Core ---
 		implementation 'org.springframework.boot:spring-boot-starter-web'
 		providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-
+		implementation 'org.springframework.boot:spring-boot-starter-mail'
 		// --- Data Access / Persistence ---
 		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 		runtimeOnly 'org.postgresql:postgresql'
@@ -49,6 +50,13 @@ dependencies {
 //		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //		testImplementation 'org.springframework.security:spring-security-test'
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+		// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail
+		implementation("org.springframework.boot:spring-boot-starter-mail:1.2.0.RELEASE")
+
+		// https://mvnrepository.com/artifact/jakarta.mail/jakarta.mail-api
+		implementation 'org.eclipse.angus:angus-mail:2.0.2'
+		//implementation("jakarta.mail:jakarta.mail-api:2.1.3")
 	}
 
 }

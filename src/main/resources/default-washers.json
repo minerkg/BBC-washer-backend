@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Washer_1",
+    "capacity": 6,
+    "status": "AVAILABLE"
+  },
+  {
+    "name": "Washer_2",
+    "capacity": 6,
+    "status": "MAINTENANCE"
+  }
+]

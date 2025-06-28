@@ -1,5 +1,8 @@
 package com.bcc.washer.domain;
 
+import com.bcc.washer.domain.reservation.Reservation;
+import com.bcc.washer.domain.time.TimeSlot;
+import com.bcc.washer.domain.washer.Washer;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +16,8 @@ import lombok.*;
         name = "BookableUnit.withAllData",
         attributeNodes = {
                 @NamedAttributeNode(value = "washer"),
-                @NamedAttributeNode(value = "timeSlot", subgraph = "timeSlot-subgraph")
+                @NamedAttributeNode(value = "timeSlot", subgraph = "timeSlot-subgraph"),
+                @NamedAttributeNode(value = "reservation", subgraph = "reservation-subgraph")
         },
 
         subgraphs = {
@@ -21,6 +25,12 @@ import lombok.*;
                         name = "timeSlot-subgraph",
                         attributeNodes = {
                                 @NamedAttributeNode(value = "timeInterval")
+                        }
+                ),
+                @NamedSubgraph(
+                        name = "reservation-subgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode(value = "user") // Assuming Reservation has a User field
                         }
                 )
 
@@ -32,10 +42,10 @@ public class BookableUnit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     private Washer washer;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     private TimeSlot timeSlot;
 
     @OneToOne(mappedBy = "bookableUnit")

@@ -1,7 +1,13 @@
-// src/main/java/com/bcc/washer/controller/WasherController.java
+
 package com.bcc.washer.controller;
 
-import com.bcc.washer.domain.Washer;
+import com.bcc.washer.domain.washer.Washer;
+
+import com.bcc.washer.dto.WasherRequest;
+import com.bcc.washer.exceptions.WasherAlreadyExistsException;
+
+import com.bcc.washer.domain.washer.WasherStatus;
+
 import com.bcc.washer.service.WasherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,14 +24,24 @@ public class WasherController {
     private WasherService washerService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody Washer washer) {
+    public ResponseEntity<ApiResponse<Washer>> addWasher(@RequestBody WasherRequest washer) {
         try {
+            washerService.verifyDuplicateWasher(washer);
             Washer newWasher = washerService.addWasher(washer);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("Washer added successfully", newWasher));
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>("Washer added successfully", newWasher));
+        } catch (WasherAlreadyExistsException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(e.getMessage(), null));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to add washer", null));
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("Failed to add washer: " + e.getMessage(), null));
         }
     }
+
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Washer>>> getAllWashers() {
@@ -38,21 +54,10 @@ public class WasherController {
         }
     }
 
-    // New endpoint to get all washers with real-time status (includes IN_USE)
-    @GetMapping("/status") // Can be accessed by EMPLOYEE or USER roles as well
-    public ResponseEntity<ApiResponse<List<Washer>>> getAllWashersWithRealtimeStatus() {
-        try {
-            List<Washer> washers = washerService.getAllWashersWithRealtimeStatus();
-            return ResponseEntity.ok(new ApiResponse<>("All washers with real-time status retrieved", washers));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to retrieve real-time washer statuses", null));
-        }
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Washer>> getWasherById(@PathVariable Long id) {
         try {
-            // This will return the stored status (AVAILABLE/MAINTENANCE)
             Washer washer = washerService.getWasherById(id);
             return ResponseEntity.ok(new ApiResponse<>("Washer retrieved", washer));
         } catch (RuntimeException e) {
@@ -62,18 +67,6 @@ public class WasherController {
         }
     }
 
-    // New endpoint to get a single washer with real-time status
-    @GetMapping("/{id}/status") // Can be accessed by EMPLOYEE or USER roles as well
-    public ResponseEntity<ApiResponse<Washer>> getWasherWithRealtimeStatusById(@PathVariable Long id) {
-        try {
-            Washer washer = washerService.getWasherWithRealtimeStatusById(id);
-            return ResponseEntity.ok(new ApiResponse<>("Washer with real-time status retrieved", washer));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Washer not found", null));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to retrieve real-time washer status", null));
-        }
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Washer>> updateWasher(@PathVariable Long id, @RequestBody Washer washer) {
@@ -82,20 +75,33 @@ public class WasherController {
             return ResponseEntity.ok(new ApiResponse<>("Washer updated successfully", updatedWasher));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Washer not found", null));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to update washer", null));
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteWasher(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<String>> decommissionWasher(@PathVariable Long id) {
         try {
-            washerService.deleteWasher(id);
-            return ResponseEntity.ok(new ApiResponse<>("Washer deleted", "Washer with ID " + id + " has been successfully deleted."));
+            washerService.decommissionWasher(id);
+            return ResponseEntity.ok(new ApiResponse<>("Washer decommissioned", "Washer with ID " + id + " has been successfully decommissioned."));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("Washer not found", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to delete washer", e.getMessage()));
+            return ResponseEntity.internalServerError().body(new ApiResponse<>("Failed to decommission washer", e.getMessage()));
         }
     }
+
+    @PutMapping("/status-update/{id}")
+    public ResponseEntity<ApiResponse<Washer>> updateWasherStatus(
+            @PathVariable Long id,
+            @RequestParam("newStatus") WasherStatus newStatus) {
+        try {
+            Washer updatedWasher = washerService.updateWasherStatus(id, newStatus);
+            return ResponseEntity.ok(new ApiResponse<>("The washer's status successfully updated", updatedWasher));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("error: " +  e.getMessage(), null));
+
+        }
+    }
+
 }
